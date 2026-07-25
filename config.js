@@ -9,5 +9,5 @@ const CONFIG = {
   TELEGRAM_BOT_USERNAME: "js7kh_bot",
   
   // ជំនាន់ឯកសារ/រូបភាព (Asset Version) សម្រាប់អាប់ដេតរូបភាពកុំអោយជាប់ Cache លើទូរស័ព្ទដៃ
-  ASSET_VERSION: "14.5"
+  ASSET_VERSION: "14.7"
 };
