@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JS7KH - កម្មវិធីផ្សាយលក់ & ឧបករណ៍ឌីជីថលទាន់សម័យ</title>
+  <meta name="description" content="JS7KH - វេទិកាផ្សាយលក់កម្មវិធី (Software Tools), វគ្គសិក្សា, Source Code, អាខោន និង ឧបករណ៍ឌីជីថល ជាមួយនឹងប្រព័ន្ធទូទាត់ប្រាក់ KHQR ស្វ័យប្រវត្តិ">
+  
+  <!-- Asynchronous Non-blocking FontAwesome & Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kantumruy+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  
+  <!-- Embedded Inseparable Design System & Styles -->
+  <style>
+@charset "UTF-8";
+/* JS7KH - Premium Cyber Dark Software & Digital Tools Store CSS */
+
+:root {
+  --bg-main: #070a12;
+  --bg-header: rgba(11, 16, 28, 0.85);
+  --bg-card: #0f1629;
+  --bg-card-hover: #15203b;
+  --bg-input: #121a30;
+  --bg-modal: #0d1324;
+  
+  --accent-primary: #0070f3;
+  --accent-cyan: #00d2ff;
+  --accent-gradient: linear-gradient(135deg, #0070f3 0%, #00d2ff 100%);
+  --accent-gold: #ffb703;
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+  
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(0, 210, 255, 0.25);
+  
+  --font-family: 'Kantumruy Pro', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --shadow-glow: 0 0 25px rgba(0, 112, 243, 0.25);
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: var(--font-family);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+.top-ticker {
+  background: linear-gradient(90deg, #070d1d 0%, #0c1833 50%, #070d1d 100%);
+  border-bottom: 1px solid var(--border-subtle);
+  overflow: hidden;
+  padding: 8px 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+.ticker-wrap {
+  display: flex;
+  white-space: nowrap;
+  animation: marquee 35s linear infinite;
+}
+.ticker-wrap:hover {
+  animation-play-state: paused;
+}
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 30px;
+}
+.flag-icon {
+  font-size: 1.1rem;
+}
+.highlight-khmer {
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--bg-header);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.navbar-container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text-main);
+  font-weight: 800;
+  font-size: 1.6rem;
+  letter-spacing: -0.5px;
+}
+.logo-badge {
+  background: var(--accent-gradient);
+  color: white;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+}
+.brand-text span {
+  color: var(--accent-cyan);
+}
+
+.search-box-container {
+  flex: 1;
+  max-width: 500px;
+  position: relative;
+}
+.search-input {
+  width: 100%;
+  padding: 10px 18px 10px 42px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 30px;
+  color: var(--text-main);
+  font-size: 0.95rem;
+  font-family: var(--font-family);
+  transition: var(--transition);
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+}
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.nav-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+.nav-link:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-primary {
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  font-family: var(--font-family);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+  box-shadow: var(--shadow-glow);
+  text-decoration: none;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(0, 210, 255, 0.5);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  padding: 9px 18px;
+  border-radius: 30px;
+  font-weight: 500;
+  font-size: 0.92rem;
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-cyan);
+}
+
+.hero-section {
+  position: relative;
+  padding: 65px 24px 40px;
+  text-align: center;
+  background: radial-gradient(circle at 50% 20%, rgba(0, 112, 243, 0.15) 0%, transparent 60%);
+}
+.hero-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.khqr-notice-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 183, 3, 0.1);
+  border: 1px solid rgba(255, 183, 3, 0.3);
+  color: var(--accent-gold);
+  padding: 6px 18px;
+  border-radius: 30px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.khqr-mini-tag {
+  background: #e6192d;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.hero-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+  line-height: 1.25;
+}
+.hero-title span {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero-subtitle {
+  color: var(--text-muted);
+  font-size: 1.15rem;
+  max-width: 750px;
+  margin: 0 auto 30px;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 35px;
+  padding-top: 25px;
+  border-top: 1px solid var(--border-subtle);
+}
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+.stat-number {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--accent-cyan);
+}
+.stat-label {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.filter-section {
+  max-width: 1320px;
+  margin: 0 auto 30px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.category-tabs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.tab-btn {
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  padding: 8px 18px;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.tab-btn:hover {
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.tab-btn.active {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 15px rgba(0, 112, 243, 0.4);
+}
+
+.sort-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.sort-select {
+  background: var(--bg-input);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family);
+  font-size: 0.88rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.products-section {
+  max-width: 1320px;
+  margin: 0 auto 80px;
+  padding: 0 24px;
+}
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.product-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+  position: relative;
+}
+.product-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--border-glow);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), var(--shadow-glow);
+  background: var(--bg-card-hover);
+}
+
+.card-img-wrapper {
+  position: relative;
+  width: 100%;
+  height: 195px;
+  overflow: hidden;
+  background: #000;
+}
+.card-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.product-card:hover .card-img-wrapper img {
+  transform: scale(1.05);
+}
+
+.card-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 2;
+}
+.badge-tool {
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+}
+.badge-course {
+  background: rgba(0, 112, 243, 0.9);
+  color: white;
+}
+.badge-account {
+  background: rgba(255, 183, 3, 0.9);
+  color: #111;
+}
+.badge-fb-page {
+  background: rgba(24, 119, 242, 0.95);
+  color: white;
+}
+.badge-fb-account {
+  background: rgba(13, 80, 161, 0.95);
+  color: white;
+}
+
+.stock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(7, 10, 18, 0.75);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  pointer-events: none;
+}
+.badge-out-of-stock {
+  background: #ef4444;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.5);
+}
+.badge-coming-soon {
+  background: #f59e0b;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.5);
+}
+
+.btn-disabled {
+  background: #334155 !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+body:not(.admin-mode-active) .btn-admin-edit,
+body:not(.admin-mode-active) .btn-admin-delete,
+body:not(.admin-mode-active) #openAdminBtn {
+  display: none !important;
+}
+
+.card-admin-controls {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+}
+.btn-admin-edit {
+  background: #0070f3;
+  color: white;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-admin-delete {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-card-share {
+  background: rgba(0, 210, 255, 0.15);
+  color: var(--accent-cyan);
+  border: 1px solid var(--border-glow);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-card-share:hover {
+  background: var(--accent-cyan);
+  color: #000;
+}
+
+.price-tag {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(11, 16, 28, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-glow);
+  padding: 4px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 2;
+}
+.original-price {
+  text-decoration: line-through;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}
+.current-price {
+  color: var(--accent-cyan);
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.card-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.product-title {
+  font-size: 1.12rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  line-height: 1.35;
+  color: var(--text-main);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.product-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.product-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+  margin-bottom: 16px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+.meta-enrolled {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.btn-card-learn {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-family);
+  cursor: pointer;
+  text-align: center;
+  transition: var(--transition);
+}
+.btn-card-learn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--text-muted);
+}
+.btn-card-buy {
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-family);
+  cursor: pointer;
+  text-align: center;
+  transition: var(--transition);
+  box-shadow: 0 0 10px rgba(0, 112, 243, 0.3);
+}
+.btn-card-buy:hover {
+  opacity: 0.95;
+  transform: scale(1.02);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(4, 7, 15, 0.85);
+  backdrop-filter: blur(10px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-card {
+  background: var(--bg-modal);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-lg);
+  max-width: 650px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 112, 243, 0.2);
+  transform: translateY(20px);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.modal-overlay.active .modal-card {
+  transform: translateY(0);
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 4px;
+  transition: var(--transition);
+}
+.modal-close:hover {
+  color: var(--accent-red);
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.khqr-card-container {
+  background: #ffffff;
+  color: #111111;
+  border-radius: 18px;
+  padding: 24px;
+  max-width: 380px;
+  margin: 0 auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+.khqr-card-header {
+  background: #e6192d;
+  margin: -24px -24px 20px -24px;
+  padding: 14px;
+  color: white;
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.khqr-merchant-info {
+  margin-bottom: 15px;
+}
+.khqr-store-name {
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #0d1324;
+}
+.khqr-amount {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #e6192d;
+  margin: 6px 0;
+}
+
+.qr-code-box {
+  background: white;
+  padding: 16px;
+  border: 2px dashed #e2e8f0;
+  border-radius: 12px;
+  display: inline-block;
+  margin: 10px 0;
+  position: relative;
+}
+.qr-code-box img {
+  width: 200px;
+  height: 200px;
+  display: block;
+}
+
+.khqr-timer {
+  margin-top: 14px;
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 600;
+}
+.timer-countdown {
+  color: #e6192d;
+  font-weight: 800;
+}
+
+.btn-simulate-pay {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  width: 100%;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  font-family: var(--font-family);
+  cursor: pointer;
+  margin-top: 20px;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-simulate-pay:hover {
+  background: #059669;
+}
+
+.payment-success-card {
+  text-align: center;
+  padding: 10px 0;
+}
+.success-icon {
+  width: 70px;
+  height: 70px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  margin: 0 auto 16px;
+  border: 2px solid var(--accent-green);
+}
+.license-box {
+  background: var(--bg-input);
+  border: 1px dashed var(--accent-cyan);
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  margin: 20px 0;
+  text-align: left;
+}
+.license-key-value {
+  font-family: monospace;
+  font-size: 1.1rem;
+  color: var(--accent-gold);
+  font-weight: 700;
+  word-break: break-all;
+  margin-top: 4px;
+}
+
+.floating-widgets {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 999;
+}
+.float-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  transition: var(--transition);
+  position: relative;
+}
+.float-btn:hover {
+  transform: scale(1.1);
+}
+.float-telegram {
+  background: #0088cc;
+}
+.float-messenger {
+  background: linear-gradient(45deg, #0084ff, #a033ff);
+}
+.float-tooltip {
+  position: absolute;
+  right: 64px;
+  background: #0f1629;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  border: 1px solid var(--border-subtle);
+}
+.float-btn:hover .float-tooltip {
+  opacity: 1;
+}
+
+.site-footer {
+  background: #05080f;
+  border-top: 1px solid var(--border-subtle);
+  padding: 50px 24px 30px;
+  color: var(--text-muted);
+}
+.footer-container {
+  max-width: 1320px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 35px;
+  margin-bottom: 40px;
+}
+.footer-col h4 {
+  color: var(--text-main);
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+.footer-links {
+  list-style: none;
+}
+.footer-links li {
+  margin-bottom: 10px;
+}
+.footer-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: var(--transition);
+  font-size: 0.9rem;
+}
+.footer-links a:hover {
+  color: var(--accent-cyan);
+}
+.footer-bottom {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding-top: 25px;
+  border-top: 1px solid var(--border-subtle);
+  text-align: center;
+  font-size: 0.88rem;
+}
+
+.form-group {
+  margin-bottom: 16px;
+  text-align: left;
+}
+.form-label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-main);
+}
+.form-control {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-family: var(--font-family);
+  font-size: 0.9rem;
+}
+.form-control:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+}
+
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.toast {
+  background: var(--bg-card);
+  border-left: 4px solid var(--accent-cyan);
+  color: var(--text-main);
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+  .navbar-container {
+    flex-wrap: wrap;
+  }
+  .search-box-container {
+    order: 3;
+    max-width: 100%;
+    width: 100%;
+    margin-top: 10px;
+  }
+  .stats-row {
+    gap: 20px;
+  }
+}
+  </style>
+</head>
+<body>
+
+  <!-- Top Marquee Banner -->
+  <div class="top-ticker">
+    <div class="ticker-wrap">
+      <div class="ticker-item">
+        <span class="flag-icon">🇰🇭</span> 
+        <span>សូមស្វាគមន៍មកកាន់ <strong class="highlight-khmer">JS7KH Store</strong> - ផ្សាយលក់កម្មវិធី និង ឧបករណ៍ឌីជីថល គុណភាពខ្ពស់ ទំនុកចិត្ត ១០០%</span>
+      </div>
+      <div class="ticker-item">
+        <span class="flag-icon">⚡</span> 
+        <span>ទូទាត់ប្រាក់ស្វ័យប្រវត្តិ 24/7 តាមរយៈ <strong class="highlight-khmer">KHQR (Bakong, ABA, ACLEDA)</strong> ទទួលបានលីងទាញយកភ្លាមៗ!</span>
+      </div>
+      <div class="ticker-item">
+        <span class="flag-icon">🇰🇭</span> 
+        <span>ខ្មែរ ស្រឡាញ់ខ្មែរ! គាំទ្រស្នាដៃ និង កម្មវិធីរបស់កូនខ្មែរ</span>
+      </div>
+      <div class="ticker-item">
+        <span class="flag-icon">📞</span> 
+        <span>ត្រូវការជំនួយផ្ទាល់? ទំនាក់ទំនង Telegram: <strong class="highlight-khmer">@SOYCHES7</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header Navigation -->
+  <header class="site-header">
+    <div class="navbar-container">
+      <a href="#" class="brand-logo">
+        <span class="logo-badge">JS7</span>
+        <span class="brand-text">JS7KH<span>.STORE</span></span>
+      </a>
+
+      <div class="search-box-container">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="searchInput" class="search-input" placeholder="ស្វែងរកកម្មវិធី, Source Code, Tools... (Search...)">
+      </div>
+
+      <!-- Header Navigation Actions -->
+      <div class="nav-actions">
+        <a href="#courses" class="nav-link"><i class="fa-solid fa-graduation-cap"></i> វគ្គសិក្សា</a>
+        <a href="https://t.me/SOYCHES7?fbclid=IwZXh0bgNhZW0CMTAAYnJpZBEySTdMZjFYOWRWSTVRM3ZCdHNydGMGYXBwX2lkEDIyMjAzOTE3ODgyMDA4OTIAAR7KZ60TQJm85UhC183DtqwfsruAmsVKquXiurPO6OKUP7UNr5MnDVZEp5A8gA_aem_kaeDhpTxenx1HMq6wUZGnw" target="_blank" class="nav-link"><i class="fa-brands fa-telegram"></i> Telegram Contact</a>
+        <button id="openAdminBtn" class="btn-outline" title="បន្ថែមកម្មវិធីលក់">
+          <i class="fa-solid fa-plus"></i> បន្ថែមកម្មវិធី
+        </button>
+        <button id="loginBtn" class="btn-primary">
+          <i class="fa-solid fa-user-check"></i> ចូលប្រើ (Login)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <section class="hero-section">
+    <div class="hero-container">
+      <div class="khqr-notice-badge">
+        <span class="khqr-mini-tag">KHQR</span> 
+        <span>ទូទាត់ប្រាក់ដោយស្វ័យប្រវត្តិ តាមរយៈ KHQR ដើម្បីទទួលបានការទាញយក ឬ លើកអាជ្ញាប័ណ្ណប្រើប្រាស់</span>
+      </div>
+      <h1 class="hero-title">កម្មវិធី & ឧបករណ៍ឌីជីថល <span>JS7KH</span></h1>
+      <p class="hero-subtitle">
+        ប្រភពប្រមូលផ្តុំ កម្មវិធីស្វ័យប្រវត្តិ (Automation Tools), AI Accounts, Source Code, និង វគ្គសិក្សាអនឡាញដែលមានសុវត្ថិភាពខ្ពស់បំផុត។
+      </p>
+
+      <div class="stats-row">
+        <div class="stat-item">
+          <span class="stat-number">1,500+</span>
+          <span class="stat-label">អ្នកប្រើប្រាស់ជោគជ័យ</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">65+</span>
+          <span class="stat-label">កម្មវិធី & Tools</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">100%</span>
+          <span class="stat-label">ទូទាត់ KHQR ស្វ័យប្រវត្តិ</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">24/7</span>
+          <span class="stat-label">សេវាកម្មគាំទ្រ</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Category & Filter Bar -->
+  <section class="filter-section">
+    <div class="category-tabs">
+      <button class="tab-btn active" data-category="all">ទាំងអស់ (All)</button>
+      <button class="tab-btn" data-category="tools">កម្មវិធី/Tools</button>
+      <button class="tab-btn" data-category="account">Upgrade Account</button>
+      <button class="tab-btn" data-category="sourcecode">Source Code</button>
+      <button class="tab-btn" data-category="course">វគ្គសិក្សា (Courses)</button>
+      <button class="tab-btn" data-category="fb-page">Facebook Page</button>
+      <button class="tab-btn" data-category="fb-account">Facebook Account</button>
+    </div>
+
+    <div class="sort-container">
+      <label for="sortSelect"><i class="fa-solid fa-filter"></i> តម្រៀបតាម:</label>
+      <select id="sortSelect" class="sort-select">
+        <option value="popular">ពេញនិយមបំផុត</option>
+        <option value="price-low">តម្លៃពីទាប ទៅខ្ពស់</option>
+        <option value="price-high">តម្លៃពីខ្ពស់ ទៅទាប</option>
+        <option value="newest">កម្មវិធីមកថ្មី</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- Main Products Grid -->
+  <main class="products-section">
+    <div class="products-grid" id="productsContainer">
+      <!-- Dynamic Products Cards Rendered by JS -->
+    </div>
+  </main>
+
+  <!-- Product Details Modal -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="detailTitle">ព័ត៌មានលម្អិតអំពីកម្មវិធី</div>
+        <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="detailBody">
+        <!-- Details injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- KHQR Checkout Modal -->
+  <div class="modal-overlay" id="khqrModal">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fa-solid fa-qrcode" style="color: var(--accent-red);"></i> ទូទាត់ប្រាក់ KHQR</div>
+        <button class="modal-close" onclick="closeModal('khqrModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="khqrBody">
+        <!-- KHQR Content injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Add Product Modal -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fa-solid fa-plus-circle"></i> បន្ថែមកម្មវិធីថ្មី (JS7KH Admin)</div>
+        <button class="modal-close" onclick="closeModal('adminModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="addProductForm">
+          <div class="form-group">
+            <label class="form-label">ឈ្មោះកម្មវិធី/Tool Name:</label>
+            <input type="text" id="addTitle" class="form-control" placeholder="ឧ. Tool Reg Account Telegram..." required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ប្រភេទ (Category):</label>
+            <select id="addCategory" class="form-control" required>
+              <option value="tools">កម្មវិធី/Tools</option>
+              <option value="account">Upgrade Account</option>
+              <option value="sourcecode">Source Code</option>
+              <option value="course">វគ្គសិក្សា (Courses)</option>
+              <option value="fb-page">Facebook Page</option>
+              <option value="fb-account">Facebook Account</option>
+            </select>
+          </div>
+          <div class="form-group" style="display: flex; gap: 12px;">
+            <div style="flex: 1;">
+              <label class="form-label">តម្លៃលក់ ($):</label>
+              <input type="number" step="0.01" id="addPrice" class="form-control" placeholder="10.00" required>
+            </div>
+            <div style="flex: 1;">
+              <label class="form-label">តម្លៃដើម ($):</label>
+              <input type="number" step="0.01" id="addOriginalPrice" class="form-control" placeholder="25.00">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ស្ថានភាពស្តុក (Stock Status):</label>
+            <select id="addStockStatus" class="form-control" required>
+              <option value="in-stock">✅ មានក្នុងស្តុក (In Stock)</option>
+              <option value="out-of-stock">🚫 លក់អស់ហើយ (Out of Stock)</option>
+              <option value="coming-soon">⏳ ជិតមកដល់ (Coming Soon)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><i class="fa-solid fa-folder-open"></i> ជ្រើសរើសរូបភាពពី Computer របស់អ្នក:</label>
+            <input type="file" id="addImageFile" class="form-control" accept="image/*">
+            <img id="addImgPreview" src="" alt="Preview" style="display:none; max-height: 120px; border-radius: var(--radius-sm); margin-top: 10px; border: 1px solid var(--border-subtle);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ឬ ដាក់តំណភ្ជាប់រូបភាព (Image URL):</label>
+            <input type="text" id="addImage" class="form-control" placeholder="./assets/images/telegram.png">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ការពិពណ៌នាខ្លី (Short Description):</label>
+            <textarea id="addDesc" class="form-control" rows="3" placeholder="ព័ត៌មានសង្ខេបអំពីកម្មវិធី..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">លីងទាញយក / Telegram Link (ក្រោយទូទាត់):</label>
+            <input type="text" id="addDownloadLink" class="form-control" placeholder="https://t.me/SOYCHES7">
+          </div>
+          <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">
+            <i class="fa-solid fa-cloud-arrow-up"></i> រក្សាទុក និង ផ្សាយលក់
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Edit Product Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fa-solid fa-pen-to-square"></i> កែប្រែកម្មវិធីលក់ (JS7KH Admin)</div>
+        <button class="modal-close" onclick="closeModal('editModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="editProductForm">
+          <input type="hidden" id="editId">
+          <div class="form-group">
+            <label class="form-label">ឈ្មោះកម្មវិធី/Tool Name:</label>
+            <input type="text" id="editTitle" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ប្រភេទ (Category):</label>
+            <select id="editCategory" class="form-control" required>
+              <option value="tools">កម្មវិធី/Tools</option>
+              <option value="account">Upgrade Account</option>
+              <option value="sourcecode">Source Code</option>
+              <option value="course">វគ្គសិក្សា (Courses)</option>
+              <option value="fb-page">Facebook Page</option>
+              <option value="fb-account">Facebook Account</option>
+            </select>
+          </div>
+          <div class="form-group" style="display: flex; gap: 12px;">
+            <div style="flex: 1;">
+              <label class="form-label">តម្លៃលក់ ($):</label>
+              <input type="number" step="0.01" id="editPrice" class="form-control" required>
+            </div>
+            <div style="flex: 1;">
+              <label class="form-label">តម្លៃដើម ($):</label>
+              <input type="number" step="0.01" id="editOriginalPrice" class="form-control">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ស្ថានភាពស្តុក (Stock Status):</label>
+            <select id="editStockStatus" class="form-control" required>
+              <option value="in-stock">✅ មានក្នុងស្តុក (In Stock)</option>
+              <option value="out-of-stock">🚫 លក់អស់ហើយ (Out of Stock)</option>
+              <option value="coming-soon">⏳ ជិតមកដល់ (Coming Soon)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><i class="fa-solid fa-folder-open"></i> ជ្រើសរើសរូបភាពពី Computer របស់អ្នក:</label>
+            <input type="file" id="editImageFile" class="form-control" accept="image/*">
+            <img id="editImgPreview" src="" alt="Preview" style="display:none; max-height: 120px; border-radius: var(--radius-sm); margin-top: 10px; border: 1px solid var(--border-subtle);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ឬ ដាក់តំណភ្ជាប់រូបភាព (Image URL):</label>
+            <input type="text" id="editImage" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ការពិពណ៌នាខ្លី (Short Description):</label>
+            <textarea id="editDesc" class="form-control" rows="3" required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">លីងទាញយក / Telegram Link:</label>
+            <input type="text" id="editDownloadLink" class="form-control" required>
+          </div>
+          <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">
+            <i class="fa-solid fa-floppy-disk"></i> រក្សាទុកការកែប្រែ
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-card" style="max-width: 440px; text-align: center;">
+      <div class="modal-header" style="border-bottom: 1px solid var(--border-subtle);">
+        <div class="modal-title" style="color: var(--accent-red);"><i class="fa-solid fa-triangle-exclamation"></i> បញ្ជាក់ការលុបកម្មវិធី</div>
+        <button class="modal-close" onclick="closeModal('deleteModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 24px;">
+        <i class="fa-solid fa-trash-can" style="font-size: 3.5rem; color: #ef4444; margin-bottom: 16px; display: block;"></i>
+        <h3 style="color: var(--text-main); font-size: 1.15rem; margin-bottom: 10px;">តើអ្នកពិតជាចង់លុបកម្មវិធីនេះចេញមែនទេ?</h3>
+        <p id="deleteItemTitle" style="color: var(--accent-cyan); font-weight: 700; font-size: 1rem; margin-bottom: 24px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;"></p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <button class="btn-outline" onclick="closeModal('deleteModal')">
+            <i class="fa-solid fa-xmark"></i> បោះបង់
+          </button>
+          <button id="confirmDeleteBtn" class="btn-primary" style="background: #ef4444; justify-content: center;">
+            <i class="fa-solid fa-trash-check"></i> លុបចេញភ្លាម
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Login Modal -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal-card" style="max-width: 420px;">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fa-solid fa-user-lock"></i> ចូលប្រើប្រាស់ JS7KH Admin Portal</div>
+        <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="adminLoginForm">
+          <div class="form-group">
+            <label class="form-label">លេខកូដសម្ងាត់ Admin (Admin Passcode):</label>
+            <input type="password" id="adminPasscode" class="form-control" placeholder="បញ្ចូលលេខកូដ ឧ. js7kh" required>
+            <small style="color: var(--text-dim); display: block; margin-top: 6px;">(លេខកូដ default: <strong>js7kh</strong> ឬ <strong>123456</strong>)</small>
+          </div>
+          <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">
+            <i class="fa-solid fa-key"></i> បើកប្រព័ន្ធ Admin
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Floating Social / Support Widgets -->
+  <div class="floating-widgets">
+    <a href="https://t.me/SOYCHES7?fbclid=IwZXh0bgNhZW0CMTAAYnJpZBEySTdMZjFYOWRWSTVRM3ZCdHNydGMGYXBwX2lkEDIyMjAzOTE3ODgyMDA4OTIAAR7KZ60TQJm85UhC183DtqwfsruAmsVKquXiurPO6OKUP7UNr5MnDVZEp5A8gA_aem_kaeDhpTxenx1HMq6wUZGnw" target="_blank" class="float-btn float-telegram" title="Telegram Support">
+      <i class="fa-brands fa-telegram"></i>
+      <span class="float-tooltip">Telegram Support (@SOYCHES7)</span>
+    </a>
+    <a href="https://t.me/SOYCHES7?fbclid=IwZXh0bgNhZW0CMTAAYnJpZBEySTdMZjFYOWRWSTVRM3ZCdHNydGMGYXBwX2lkEDIyMjAzOTE3ODgyMDA4OTIAAR7KZ60TQJm85UhC183DtqwfsruAmsVKquXiurPO6OKUP7UNr5MnDVZEp5A8gA_aem_kaeDhpTxenx1HMq6wUZGnw" target="_blank" class="float-btn float-messenger" title="Facebook Messenger">
+      <i class="fa-brands fa-facebook-messenger"></i>
+      <span class="float-tooltip">Facebook Support</span>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-col">
+        <div class="brand-logo" style="margin-bottom: 15px;">
+          <span class="logo-badge">JS7</span>
+          <span class="brand-text">JS7KH<span>.STORE</span></span>
+        </div>
+        <p style="font-size: 0.88rem; line-height: 1.6; margin-bottom: 16px;">
+          វេទិកាផ្សាយលក់កម្មវិធី និង ឧបករណ៍ឌីជីថលទាន់សម័យ ធានាសុវត្ថិភាព គុណភាព និង ការគាំទ្រ ២៤/៧។
+        </p>
+        <div style="display: flex; gap: 10px; font-size: 1.2rem;">
+          <a href="https://t.me/SOYCHES7?fbclid=IwZXh0bgNhZW0CMTAAYnJpZBEySTdMZjFYOWRWSTVRM3ZCdHNydGMGYXBwX2lkEDIyMjAzOTE3ODgyMDA4OTIAAR7KZ60TQJm85UhC183DtqwfsruAmsVKquXiurPO6OKUP7UNr5MnDVZEp5A8gA_aem_kaeDhpTxenx1HMq6wUZGnw" target="_blank" style="color: var(--accent-cyan);"><i class="fa-brands fa-telegram"></i></a>
+          <a href="https://t.me/SOYCHES7?fbclid=IwZXh0bgNhZW0CMTAAYnJpZBEySTdMZjFYOWRWSTVRM3ZCdHNydGMGYXBwX2lkEDIyMjAzOTE3ODgyMDA4OTIAAR7KZ60TQJm85UhC183DtqwfsruAmsVKquXiurPO6OKUP7UNr5MnDVZEp5A8gA_aem_kaeDhpTxenx1HMq6wUZGnw" target="_blank" style="color: var(--accent-cyan);"><i class="fa-brands fa-facebook"></i></a>
+          <a href="#" style="color: var(--accent-cyan);"><i class="fa-brands fa-youtube"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>ប្រភេទផលិតផល</h4>
+        <ul class="footer-links">
+          <li><a href="#" onclick="filterByCategory('tools')">កម្មវិធីស្វ័យប្រវត្តិ (Tools)</a></li>
+          <li><a href="#" onclick="filterByCategory('account')">Upgrade Account Gemini / AI</a></li>
+          <li><a href="#" onclick="filterByCategory('sourcecode')">Python Source Code</a></li>
+          <li><a href="#" onclick="filterByCategory('course')">វគ្គសិក្សាអនឡាញ (Courses)</a></li>
+          <li><a href="#" onclick="filterByCategory('fb-page')">Facebook Page</a></li>
+          <li><a href="#" onclick="filterByCategory('fb-account')">Facebook Account</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>ការទូទាត់ & សុវត្ថិភាព</h4>
+        <p style="font-size: 0.88rem; margin-bottom: 10px;">គាំទ្រការទូទាត់គ្រប់ធនាគារក្នុងស្រុកតាមរយៈ Bakong KHQR:</p>
+        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; font-weight: 700; color: var(--accent-gold); font-size: 0.9rem;">
+          🇰🇭 KHQR (ABA, ACLEDA, Wing, Canadia...)
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 <strong>JS7KH.STORE</strong>. រក្សាសិទ្ធិគ្រប់យ៉ាង។ ផលិតនិងបង្កើតឡើងដោយក្តីស្រឡាញ់។
+    </div>
+  </footer>
+
+  <script src="config.js?v=14.3"></script>
+  <script src="app.js?v=14.3"></script>
+</body>
+</html>
