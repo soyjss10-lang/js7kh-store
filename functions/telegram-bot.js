@@ -97,7 +97,7 @@ async function sendProductDetail(botUrl, chatId, messageId, productId, siteUrl) 
   const p = products.find(item => item.id === productId);
   if (!p) return;
 
-  const imageUrl = p.image.startsWith('.') ? `${siteUrl}/${p.image.substring(2)}` : p.image;
+  const imageUrl = (p.image.startsWith('.') ? `${siteUrl}/${p.image.substring(2)}` : p.image) + "?v=14.4";
   
   const featuresText = (p.features && p.features.length > 0)
     ? p.features.map(f => `• ${f}`).join("\n")
