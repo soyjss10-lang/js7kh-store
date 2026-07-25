@@ -79,17 +79,30 @@ async function sendCategoryView(botUrl, chatId, messageId, categoryId) {
     { text: "🔙 ត្រឡប់ក្រោយ", callback_data: "menu_home" }
   ]);
 
-  await fetch(`${botUrl}/editMessageText`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: chatId,
-      message_id: messageId,
-      text: text,
-      parse_mode: "Markdown",
-      reply_markup: { inline_keyboard }
-    })
-  });
+  if (messageId) {
+    await fetch(`${botUrl}/editMessageText`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        message_id: messageId,
+        text: text,
+        parse_mode: "Markdown",
+        reply_markup: { inline_keyboard }
+      })
+    });
+  } else {
+    await fetch(`${botUrl}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: text,
+        parse_mode: "Markdown",
+        reply_markup: { inline_keyboard }
+      })
+    });
+  }
 }
 
 // Helper function to display detailed product info (with a zero-width space preview image)
@@ -420,8 +433,8 @@ exports.handler = async (event, context) => {
           })
         });
       } else {
-        // Clean start - send the interactive main menu
-        await sendMainMenu(botUrl, chatId);
+        // Clean start - send all products view directly
+        await sendCategoryView(botUrl, chatId, null, "all");
       }
 
       return { statusCode: 200, body: "OK" };
