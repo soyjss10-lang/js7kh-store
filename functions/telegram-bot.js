@@ -436,9 +436,9 @@ exports.handler = async (event, context) => {
       let billNo = "";
 
       // Extract details from original message if they replied to it
-      if (message.reply_to_message && message.reply_to_message.text) {
-        const replyText = message.reply_to_message.text;
-        const prodMatch = replyText.match(/កូដ៖\s*`\[([a-zA-Z0-9-]+)\]`/);
+      if (message.reply_to_message) {
+        const replyText = message.reply_to_message.text || message.reply_to_message.caption || "";
+        const prodMatch = replyText.match(/កូដ៖\s*`?\[([a-zA-Z0-9-]+)\]`?/);
         const billMatch = replyText.match(/លេខវិក្កយបត្រ៖\s*#([0-9]+)/);
         if (prodMatch) productId = prodMatch[1];
         if (billMatch) billNo = billMatch[1];
