@@ -119,6 +119,10 @@ function setWebhook() {
   Logger.log(res.getContentText());
 }
 
+function doGet(e) {
+  return ContentService.createTextOutput("JS7KH Telegram Bot is running successfully!").setMimeType(ContentService.MimeType.TEXT);
+}
+
 function doPost(e) {
   try {
     const update = JSON.parse(e.postData.contents);
