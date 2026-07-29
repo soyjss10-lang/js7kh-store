@@ -174,17 +174,19 @@ function doPost(e) {
       const autoReplyText = "សូមអរគុណសម្រាប់ការផ្ញើបង្កាន់ដៃទូទាត់ប្រាក់! ប្រព័ន្ធបានផ្ញើទៅកាន់អ្នកលក់ដើម្បីផ្ទៀងផ្ទាត់រួចរាល់ហើយបាទ។";
       sendTextMessage(botUrl, chatId, null, autoReplyText, null);
 
-      const caption = "🔔 **បង្កាន់ដៃទូទាត់ថ្មីពីអតិថិជន!**\n- Chat ID: " + chatId;
-      UrlFetchApp.fetch(botUrl + "/sendPhoto", {
-        method: "post",
-        contentType: "application/json",
-        payload: JSON.stringify({
-          chat_id: TELEGRAM_OWNER_CHAT_ID,
-          photo: fileId,
-          caption: caption,
-          parse_mode: "Markdown"
-        })
-      });
+      if (chatId.toString() !== TELEGRAM_OWNER_CHAT_ID.toString()) {
+        const caption = "🔔 **បង្កាន់ដៃទូទាត់ថ្មីពីអតិថិជន!**\n- Chat ID: " + chatId;
+        UrlFetchApp.fetch(botUrl + "/sendPhoto", {
+          method: "post",
+          contentType: "application/json",
+          payload: JSON.stringify({
+            chat_id: TELEGRAM_OWNER_CHAT_ID,
+            photo: fileId,
+            caption: caption,
+            parse_mode: "Markdown"
+          })
+        });
+      }
     }
 
     return ContentService.createTextOutput("OK");

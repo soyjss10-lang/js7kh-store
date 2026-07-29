@@ -433,17 +433,20 @@ exports.handler = async (event, context) => {
         ]
       };
 
-      await fetch(`${botUrl}/sendPhoto`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: ownerChatId,
-          photo: fileId,
-          caption: caption,
-          parse_mode: "Markdown",
-          reply_markup: keyboard
-        })
-      });
+      // Only forward notification to owner if the sender is an actual customer (not owner testing)
+      if (chatId.toString() !== ownerChatId.toString()) {
+        await fetch(`${botUrl}/sendPhoto`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: ownerChatId,
+            photo: fileId,
+            caption: caption,
+            parse_mode: "Markdown",
+            reply_markup: keyboard
+          })
+        });
+      }
 
       return { statusCode: 200, body: "OK" };
     }
