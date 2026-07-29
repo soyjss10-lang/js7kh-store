@@ -270,7 +270,7 @@ exports.handler = async (event, context) => {
     // Extract dynamic Netlify host site URL for assets mapping
     const headers = event.headers || {};
     const proto = headers['x-forwarded-proto'] || 'https';
-    const host = headers['host'] || 'js7kh.netlify.app';
+    const host = headers['host'] || 'js7kh-store.netlify.app';
     const siteUrl = `${proto}://${host}`;
 
     // 1. Handle Callback Queries
