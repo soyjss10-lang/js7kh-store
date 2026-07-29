@@ -29,7 +29,6 @@ async function sendFastMessage(botUrl, chatId, messageId, text, keyboard, imageU
     chat_id: chatId,
     text: contentText,
     parse_mode: "Markdown",
-    disable_web_page_preview: false,
     reply_markup: keyboard
   };
 
@@ -382,8 +381,8 @@ exports.handler = async (event, context) => {
 
         await sendFastMessage(botUrl, chatId, null, welcomeMsg, null);
       } else {
-        // Clean start - send main menu
-        await sendMainMenu(botUrl, chatId, null);
+        // Clean start - send all products category view directly
+        await sendCategoryView(botUrl, chatId, null, "all");
       }
 
       return { statusCode: 200, body: "OK" };

@@ -165,14 +165,14 @@ function doPost(e) {
     const photo = message.photo;
 
     if (text && (text.indexOf("/start") === 0 || text.indexOf("/menu") === 0 || text.indexOf("/shop") === 0)) {
-      sendMainMenu(botUrl, chatId, null);
+      sendCategoryView(botUrl, chatId, null, "all");
       return ContentService.createTextOutput("OK");
     }
 
     if (photo && photo.length > 0) {
       const fileId = photo[photo.length - 1].file_id;
       const autoReplyText = "សូមអរគុណសម្រាប់ការផ្ញើបង្កាន់ដៃទូទាត់ប្រាក់! ប្រព័ន្ធបានផ្ញើទៅកាន់អ្នកលក់ដើម្បីផ្ទៀងផ្ទាត់រួចរាល់ហើយបាទ។";
-      sendTextMessage(botUrl, chatId, null, autoReplyText, null);
+      sendFastMessage(botUrl, chatId, null, autoReplyText, null, null);
 
       if (chatId.toString() !== TELEGRAM_OWNER_CHAT_ID.toString()) {
         const caption = "🔔 **បង្កាន់ដៃទូទាត់ថ្មីពីអតិថិជន!**\n- Chat ID: " + chatId;
@@ -207,7 +207,6 @@ function sendFastMessage(botUrl, chatId, messageId, text, keyboard, imageUrl) {
     chat_id: chatId,
     text: contentText,
     parse_mode: "Markdown",
-    disable_web_page_preview: false,
     reply_markup: keyboard
   };
 
