@@ -2,6 +2,77 @@ const token = process.env.TELEGRAM_BOT_TOKEN || "8670114174:AAGL8DPDl7tjEJzXF-hr
 const ownerChatId = process.env.TELEGRAM_OWNER_CHAT_ID || "1188063440";
 const products = require("../products_init.json");
 
+const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/soyjss10-lang/js7kh-store/main";
+
+// Helper to construct absolute image URL on raw GitHub CDN
+function getProductImageUrl(p) {
+  if (!p || !p.image) return `${GITHUB_RAW_BASE}/assets/images/user_aba_khqr.jpg`;
+  let imgPath = p.image;
+  if (imgPath.startsWith('./')) {
+    imgPath = imgPath.substring(2);
+  } else if (imgPath.startsWith('/')) {
+    imgPath = imgPath.substring(1);
+  }
+  return `${GITHUB_RAW_BASE}/${imgPath}`;
+}
+
+// Ultra-fast message sender/editor with instant image preview
+async function sendFastMessage(botUrl, chatId, messageId, text, keyboard, imageUrl = null) {
+  const cleanImageUrl = imageUrl ? imageUrl.split('?')[0] : null;
+
+  let contentText = text;
+  if (cleanImageUrl) {
+    contentText = `[\u200B](${cleanImageUrl})\n` + text;
+  }
+
+  const payload = {
+    chat_id: chatId,
+    text: contentText,
+    parse_mode: "Markdown",
+    disable_web_page_preview: false,
+    reply_markup: keyboard
+  };
+
+  if (cleanImageUrl) {
+    payload.link_preview_options = {
+      is_disabled: false,
+      url: cleanImageUrl,
+      prefer_large_media: true,
+      show_above_text: true
+    };
+  }
+
+  let success = false;
+  if (messageId) {
+    try {
+      const res = await fetch(`${botUrl}/editMessageText`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message_id: messageId,
+          ...payload
+        })
+      });
+      const data = await res.json();
+      if (data.ok) success = true;
+    } catch (e) {
+      console.error("editMessageText error:", e);
+    }
+  }
+
+  if (!success) {
+    try {
+      await fetch(`${botUrl}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      console.error("sendMessage error:", e);
+    }
+  }
+}
+
 // Helper function to send the main shop category menu
 async function sendMainMenu(botUrl, chatId, messageId = null) {
   const text = `👋 **សួស្តីបង! សូមស្វាគមន៍មកកាន់ JS7KH Store Bot!** 🇰🇭\n\n` +
@@ -24,30 +95,7 @@ async function sendMainMenu(botUrl, chatId, messageId = null) {
     ]
   };
 
-  if (messageId) {
-    await fetch(`${botUrl}/editMessageText`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        message_id: messageId,
-        text: text,
-        parse_mode: "Markdown",
-        reply_markup: keyboard
-      })
-    });
-  } else {
-    await fetch(`${botUrl}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: text,
-        parse_mode: "Markdown",
-        reply_markup: keyboard
-      })
-    });
-  }
+  await sendFastMessage(botUrl, chatId, messageId, text, keyboard);
 }
 
 // Helper function to show products in a specific category
@@ -76,54 +124,31 @@ async function sendCategoryView(botUrl, chatId, messageId, categoryId) {
 
   // Back button
   inline_keyboard.push([
-    { text: "🔙 ត្រឡប់ក្រោយ", callback_data: "menu_home" }
+    { text: "🔙 ត្រឡប់ទៅម៉ឺនុយដើម", callback_data: "menu_home" }
   ]);
 
-  if (messageId) {
-    await fetch(`${botUrl}/editMessageText`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        message_id: messageId,
-        text: text,
-        parse_mode: "Markdown",
-        reply_markup: { inline_keyboard }
-      })
-    });
-  } else {
-    await fetch(`${botUrl}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: text,
-        parse_mode: "Markdown",
-        reply_markup: { inline_keyboard }
-      })
-    });
-  }
+  await sendFastMessage(botUrl, chatId, messageId, text, { inline_keyboard });
 }
 
-// Helper function to display detailed product info (with a zero-width space preview image)
-async function sendProductDetail(botUrl, chatId, messageId, productId, siteUrl) {
+// Helper function to display detailed product info with fast image preview
+async function sendProductDetail(botUrl, chatId, messageId, productId) {
   const p = products.find(item => item.id === productId);
   if (!p) return;
 
-  const imageUrl = (p.image.startsWith('.') ? `${siteUrl}/${p.image.substring(2)}` : p.image) + "?v=14.4";
-  
+  const imageUrl = getProductImageUrl(p);
+
   const featuresText = (p.features && p.features.length > 0)
     ? p.features.map(f => `• ${f}`).join("\n")
     : "• ដំណើរការបានល្អ ១០០%";
 
-  const text = `[​](${imageUrl})🏷️ **${p.title}**\n` +
-               `------------------------------\n` +
-               `ℹ️ **ការពិពណ៌នា៖**\n${p.description}\n\n` +
-               `✨ **លក្ខណៈពិសេស៖**\n${featuresText}\n\n` +
-               `💰 **តម្លៃពិសេស៖** \`$${p.price.toFixed(2)} USD\` (តម្លៃដើម៖ ~~$${p.originalPrice.toFixed(2)} USD~~)\n` +
-               `📊 **ស្ថានភាព៖** ${p.stockStatus === 'in-stock' ? '🟢 មានក្នុងស្តុក (In Stock)' : '🔴 អស់ពីស្តុក'}\n` +
-               `------------------------------\n` +
-               `សូមចុចប៊ូតុងខាងក្រោមដើម្បីទិញ ឬត្រឡប់ក្រោយ៖`;
+  const caption = `🏷️ **${p.title}**\n` +
+                  `------------------------------\n` +
+                  `ℹ️ **ការពិពណ៌នា៖**\n${p.description}\n\n` +
+                  `✨ **លក្ខណៈពិសេស៖**\n${featuresText}\n\n` +
+                  `💰 **តម្លៃពិសេស៖** \`$${p.price.toFixed(2)} USD\` (តម្លៃដើម៖ ~~$${p.originalPrice.toFixed(2)} USD~~)\n` +
+                  `📊 **ស្ថានភាព៖** ${p.stockStatus === 'in-stock' ? '🟢 មានក្នុងស្តុក (In Stock)' : '🔴 អស់ពីស្តុក'}\n` +
+                  `------------------------------\n` +
+                  `សូមចុចប៊ូតុងខាងក្រោមដើម្បីទិញ ឬត្រឡប់ក្រោយ៖`;
 
   const inline_keyboard = [];
   if (p.stockStatus === 'in-stock') {
@@ -140,17 +165,7 @@ async function sendProductDetail(botUrl, chatId, messageId, productId, siteUrl) 
     { text: "🔙 ត្រឡប់ក្រោយ", callback_data: `cat_${p.category}` }
   ]);
 
-  await fetch(`${botUrl}/editMessageText`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: chatId,
-      message_id: messageId,
-      text: text,
-      parse_mode: "Markdown",
-      reply_markup: { inline_keyboard }
-    })
-  });
+  await sendFastMessage(botUrl, chatId, messageId, caption, { inline_keyboard }, imageUrl);
 }
 
 // Helper to show checkout payment selection options
@@ -176,25 +191,17 @@ async function sendCheckoutOptions(botUrl, chatId, messageId, productId) {
     ]
   ];
 
-  await fetch(`${botUrl}/editMessageText`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: chatId,
-      message_id: messageId,
-      text: text,
-      parse_mode: "Markdown",
-      reply_markup: { inline_keyboard }
-    })
-  });
+  await sendFastMessage(botUrl, chatId, messageId, text, { inline_keyboard });
 }
 
-// Helper function to display selected payment information & prompt receipt upload
-async function sendPaymentDetails(botUrl, chatId, messageId, productId, billNo, method, siteUrl) {
+// Helper function to display selected payment QR Code with fast image preview
+async function sendPaymentDetails(botUrl, chatId, messageId, productId, billNo, method) {
   const p = products.find(item => item.id === productId);
   if (!p) return;
 
-  let text = "";
+  let caption = "";
+  let qrUrl = "";
+
   const inline_keyboard = [
     [
       { text: "🔙 ត្រឡប់ក្រោយ", callback_data: `checkout_${p.id}` }
@@ -202,55 +209,26 @@ async function sendPaymentDetails(botUrl, chatId, messageId, productId, billNo, 
   ];
 
   if (method === "aba") {
-    const qrUrl = `${siteUrl}/assets/images/user_aba_khqr.jpg`;
-    text = `[​](${qrUrl})🏦 **ABA Bank Payment**\n\n` +
-           `• ឈ្មោះគណនី៖ **CHES SOY**\n` +
-           `• លេខគណនី ABA៖ \`081 887 350\` (ចុចដើម្បីចម្លង)\n` +
-           `• ចំនួនទឹកប្រាក់៖ **$${p.price.toFixed(2)} USD**\n` +
-           `• លេខវិក្កយបត្រ៖ **#${billNo}**\n\n` +
-           `⚠️ **ការណែនាំ៖** សូមស្កែនរូបភាព ABA QR កូដខាងលើ ឬផ្ទេរប្រាក់តាមគណនី ABA រួចផ្ញើ **រូបភាពបង្កាន់ដៃបង់ប្រាក់** មកកាន់ Bot នេះបាទ។`;
+    qrUrl = `${GITHUB_RAW_BASE}/assets/images/user_aba_khqr.jpg`;
+    caption = `🏦 **ABA Bank Payment (KHQR)**\n\n` +
+              `• ឈ្មោះគណនី៖ **CHES SOY**\n` +
+              `• លេខគណនី ABA៖ \`081 887 350\` (ចុចដើម្បីចម្លង)\n` +
+              `• ចំនួនទឹកប្រាក់៖ **$${p.price.toFixed(2)} USD**\n` +
+              `• លេខវិក្កយបត្រ៖ **#${billNo}**\n` +
+              `• កូដផលិតផល៖ \`[${p.id}]\`\n\n` +
+              `⚠️ **ការណែនាំ៖** សូមស្កែនរូបភាព ABA KHQR កូដខាងលើ ឬផ្ទេរប្រាក់តាមគណនី ABA រួចផ្ញើ **រូបភាពបង្កាន់ដៃបង់ប្រាក់ (Receipt Screenshot)** មកកាន់ Chat នេះបាទ។`;
   } else {
-    text = `💰 **Crypto / Binance Payment**\n\n` +
-           `• Binance ID៖ \`294507047\` (ចុចដើម្បីចម្លង)\n` +
-           `• បណ្តាញ USDT៖ **TRC20 / BEP20**\n` +
-           `• ចំនួនទឹកប្រាក់៖ **$${p.price.toFixed(2)} USD**\n` +
-           `• លេខវិក្កយបត្រ៖ **#${billNo}**\n\n` +
-           `⚠️ **ការណែនាំ៖** សូមផ្ទេរប្រាក់ រួចហើយសូមផ្ញើ **រូបភាពបង្កាន់ដៃ** ឬ **លេខកូដប្រតិបត្តិការ (Transaction TxID)** មកកាន់ Bot នេះបាទ។`;
+    qrUrl = `${GITHUB_RAW_BASE}/assets/images/binance_qr.png`;
+    caption = `💰 **Crypto / Binance Payment**\n\n` +
+              `• Binance ID៖ \`294507047\` (ចុចដើម្បីចម្លង)\n` +
+              `• បណ្តាញ USDT៖ **TRC20 / BEP20**\n` +
+              `• ចំនួនទឹកប្រាក់៖ **$${p.price.toFixed(2)} USD**\n` +
+              `• លេខវិក្កយបត្រ៖ **#${billNo}**\n` +
+              `• កូដផលិតផល៖ \`[${p.id}]\`\n\n` +
+              `⚠️ **ការណែនាំ៖** សូមស្កែនរូបភាព Binance QR កូដខាងលើ ឬផ្ទេរប្រាក់ រួចហើយសូមផ្ញើ **រូបភាពបង្កាន់ដៃ (Receipt Screenshot)** មកកាន់ Chat នេះបាទ។`;
   }
 
-  // Edit payment info text
-  await fetch(`${botUrl}/editMessageText`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: chatId,
-      message_id: messageId,
-      text: text,
-      parse_mode: "Markdown",
-      reply_markup: { inline_keyboard }
-    })
-  });
-
-  // Send a separate message requesting payment screenshot with Force Reply
-  const forceReplyText = `សូមផ្ញើរូបភាពបង្កាន់ដៃបាញ់លុយ (Receipt Screenshot) ដើម្បីទិញ៖\n` +
-                         `👉 **ផលិតផល៖** ${p.title}\n` +
-                         `👉 **លេខវិក្កយបត្រ៖** #${billNo}\n` +
-                         `👉 **កូដ៖** \`[${p.id}]\`\n\n` +
-                         `⚠️ **សំខាន់៖** សូមផ្ញើរូបថតដោយធ្វើការ **Reply** លើសារនេះ ដើម្បីឱ្យប្រព័ន្ធសម្គាល់ការទិញរបស់បងបានត្រឹមត្រូវ។`;
-
-  await fetch(`${botUrl}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text: forceReplyText,
-      parse_mode: "Markdown",
-      reply_markup: {
-        force_reply: true,
-        selective: true
-      }
-    })
-  });
+  await sendFastMessage(botUrl, chatId, messageId, caption, { inline_keyboard }, qrUrl);
 }
 
 exports.handler = async (event, context) => {
@@ -267,13 +245,7 @@ exports.handler = async (event, context) => {
     const update = JSON.parse(event.body);
     const botUrl = `https://api.telegram.org/bot${token}`;
 
-    // Extract dynamic Netlify host site URL for assets mapping
-    const headers = event.headers || {};
-    const proto = headers['x-forwarded-proto'] || 'https';
-    const host = headers['host'] || 'js7kh-store.netlify.app';
-    const siteUrl = `${proto}://${host}`;
-
-    // 1. Handle Callback Queries
+    // 1. Handle Callback Queries (Button Clicks)
     if (update.callback_query) {
       const query = update.callback_query;
       const data = query.data;
@@ -281,12 +253,12 @@ exports.handler = async (event, context) => {
       const chatId = message.chat.id;
       const messageId = message.message_id;
 
-      // Answer Callback Query immediately to stop loading spinner
-      await fetch(`${botUrl}/answerCallbackQuery`, {
+      // Answer Callback Query immediately to stop loading spinner on button in 1ms
+      fetch(`${botUrl}/answerCallbackQuery`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ callback_query_id: query.id })
-      });
+      }).catch(err => console.error("answerCallbackQuery error:", err));
 
       if (data.startsWith("approve_")) {
         const parts = data.split("_");
@@ -302,29 +274,23 @@ exports.handler = async (event, context) => {
             `📥 **តំណភ្ជាប់ទាញយក៖** ${p.downloadLink}\n\n` +
             `សូមអរគុណសម្រាប់ការគាំទ្រ JS7KH Store!`;
 
-          await fetch(`${botUrl}/sendMessage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              chat_id: customerChatId,
-              text: customerMsg,
-              parse_mode: "Markdown"
-            })
-          });
+          await sendFastMessage(botUrl, customerChatId, null, customerMsg, null);
 
-          const newCaption = `${message.caption || ""}\n\n` +
+          const newCaption = `${message.caption || message.text || ""}\n\n` +
             `✅ **បានអនុម័ត និងផ្ញើឯកសារទៅកាន់ភ្ញៀវរួចរាល់ហើយ!**`;
 
-          await fetch(`${botUrl}/editMessageCaption`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              chat_id: ownerChatId,
-              message_id: messageId,
-              caption: newCaption,
-              reply_markup: { inline_keyboard: [] }
-            })
-          });
+          if (message.photo) {
+            await fetch(`${botUrl}/editMessageCaption`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: ownerChatId,
+                message_id: message.message_id,
+                caption: newCaption,
+                reply_markup: { inline_keyboard: [] }
+              })
+            });
+          }
         }
       } else if (data.startsWith("reject_")) {
         const parts = data.split("_");
@@ -334,28 +300,23 @@ exports.handler = async (event, context) => {
         const customerMsg = `❌ **ការទូទាត់ប្រាក់របស់បងមិនត្រូវបានអនុម័តឡើយ!** (វិក្កយបត្រ៖ #${billNo})\n\n` +
           `សូមពិនិត្យមើលរូបភាពបង្កាន់ដៃបង់ប្រាក់ឡើងវិញ ឬទាក់ទងមកកាន់អ្នកលក់ផ្ទាល់។`;
 
-        await fetch(`${botUrl}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: customerChatId,
-            text: customerMsg
-          })
-        });
+        await sendFastMessage(botUrl, customerChatId, null, customerMsg, null);
 
-        const newCaption = `${message.caption || ""}\n\n` +
+        const newCaption = `${message.caption || message.text || ""}\n\n` +
           `❌ **បានបដិសេធការបញ្ជាទិញនេះ!**`;
 
-        await fetch(`${botUrl}/editMessageCaption`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: ownerChatId,
-            message_id: messageId,
-            caption: newCaption,
-            reply_markup: { inline_keyboard: [] }
-          })
-        });
+        if (message.photo) {
+          await fetch(`${botUrl}/editMessageCaption`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: ownerChatId,
+              message_id: message.message_id,
+              caption: newCaption,
+              reply_markup: { inline_keyboard: [] }
+            })
+          });
+        }
       } else if (data === "menu_home") {
         await sendMainMenu(botUrl, chatId, messageId);
       } else if (data.startsWith("cat_")) {
@@ -363,7 +324,7 @@ exports.handler = async (event, context) => {
         await sendCategoryView(botUrl, chatId, messageId, categoryId);
       } else if (data.startsWith("prod_")) {
         const productId = data.split("_")[1];
-        await sendProductDetail(botUrl, chatId, messageId, productId, siteUrl);
+        await sendProductDetail(botUrl, chatId, messageId, productId);
       } else if (data.startsWith("checkout_")) {
         const productId = data.split("_")[1];
         await sendCheckoutOptions(botUrl, chatId, messageId, productId);
@@ -371,12 +332,12 @@ exports.handler = async (event, context) => {
         const parts = data.split("_");
         const productId = parts[2];
         const billNo = parts[3];
-        await sendPaymentDetails(botUrl, chatId, messageId, productId, billNo, "aba", siteUrl);
+        await sendPaymentDetails(botUrl, chatId, messageId, productId, billNo, "aba");
       } else if (data.startsWith("pay_crypto_")) {
         const parts = data.split("_");
         const productId = parts[2];
         const billNo = parts[3];
-        await sendPaymentDetails(botUrl, chatId, messageId, productId, billNo, "crypto", siteUrl);
+        await sendPaymentDetails(botUrl, chatId, messageId, productId, billNo, "crypto");
       }
 
       return { statusCode: 200, body: "OK" };
@@ -393,7 +354,7 @@ exports.handler = async (event, context) => {
     const photo = message.photo;
     const from = message.from;
 
-    // Handle /start, /menu, /shop commands
+    // Handle /start, /menu, /shop commands ONLY
     if (text && (text.startsWith("/start") || text.startsWith("/menu") || text.startsWith("/shop"))) {
       const parts = text.split(" ");
       let billNo = "";
@@ -408,7 +369,7 @@ exports.handler = async (event, context) => {
       }
 
       if (billNo && productId) {
-        // Deep link from checkout page
+        // Deep link from website checkout page
         const p = products.find(item => item.id === productId);
         const prodTitle = p ? p.title : "មិនស្គាល់";
 
@@ -417,24 +378,12 @@ exports.handler = async (event, context) => {
           `👉 **ផលិតផល៖** ${prodTitle}\n` +
           `👉 **លេខវិក្កយបត្រ៖** #${billNo}\n` +
           `👉 **កូដ៖** \`[${productId}]\`\n\n` +
-          `⚠️ **សំខាន់៖** សូមផ្ញើរូបថតដោយធ្វើការ **Reply** លើសារនេះ ដើម្បីឱ្យប្រព័ន្ធសម្គាល់ការទិញរបស់បងបានត្រឹមត្រូវ។`;
+          `⚠️ **សំខាន់៖** សូមផ្ញើរូបថតបង្កាន់ដៃមកកាន់ Chat នេះដើម្បីឱ្យអ្នកលក់ផ្ទៀងផ្ទាត់។`;
 
-        await fetch(`${botUrl}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: welcomeMsg,
-            parse_mode: "Markdown",
-            reply_markup: {
-              force_reply: true,
-              selective: true
-            }
-          })
-        });
+        await sendFastMessage(botUrl, chatId, null, welcomeMsg, null);
       } else {
-        // Clean start - send all products view directly
-        await sendCategoryView(botUrl, chatId, null, "all");
+        // Clean start - send main menu
+        await sendMainMenu(botUrl, chatId, null);
       }
 
       return { statusCode: 200, body: "OK" };
@@ -448,51 +397,29 @@ exports.handler = async (event, context) => {
       let productId = "";
       let billNo = "";
 
-      // Extract details from original message if they replied to it
+      // Extract details from reply message or text if available
       if (message.reply_to_message) {
         const replyText = message.reply_to_message.text || message.reply_to_message.caption || "";
-        const prodMatch = replyText.match(/កូដ៖\s*`?\[([a-zA-Z0-9-]+)\]`?/);
+        const prodMatch = replyText.match(/កូដ(?:ផលិតផល)?៖\s*`?\[([a-zA-Z0-9-]+)\]`?/);
         const billMatch = replyText.match(/លេខវិក្កយបត្រ៖\s*#([0-9]+)/);
         if (prodMatch) productId = prodMatch[1];
         if (billMatch) billNo = billMatch[1];
       }
 
-      // If they uploaded photo without replying to the bot prompt, notify them
-      if (!productId) {
-        const warningMsg = `⚠️ **សូមធ្វើការ Reply លើសាររបស់ Bot ខាងលើ** រួចផ្ញើរូបភាពបង្កាន់ដៃម្តងទៀត ដើម្បីឱ្យប្រព័ន្ធស្គាល់ផលិតផលដែលបងចង់ទិញបាទ។`;
-        await fetch(`${botUrl}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: warningMsg,
-            parse_mode: "Markdown"
-          })
-        });
-        return { statusCode: 200, body: "OK" };
-      }
+      const p = productId ? products.find(item => item.id === productId) : null;
+      const prodTitle = p ? p.title : (productId || "ផលិតផលមិនស្គាល់");
 
-      const p = products.find(item => item.id === productId);
-      const prodTitle = p ? p.title : productId;
+      const autoReplyText = `សូមអរគុណសម្រាប់ការផ្ញើបង្កាន់ដៃទូទាត់ប្រាក់ (${prodTitle})! ` +
+        `ប្រព័ន្ធបានផ្ញើទៅកាន់អ្នកលក់ដើម្បីផ្ទៀងផ្ទាត់រួចរាល់ហើយ។ បងនឹងទទួលបានឯកសារ/គណនីភ្លាមបន្ទាប់ពីអ្នកលក់ពិនិត្យរួចរាល់!`;
 
-      const autoReplyText = `សូមអរគុណសម្រាប់ការផ្ញើបង្កាន់ដៃទូទាត់ប្រាក់សម្រាប់ការបញ្ជាទិញ #${billNo} (${prodTitle})! ` +
-        `ប្រព័ន្ធកំពុងផ្ញើទៅកាន់អ្នកលក់ដើម្បីផ្ទៀងផ្ទាត់។ បងនឹងទទួលបានឯកសារភ្លាមបន្ទាប់ពីអ្នកលក់ពិនិត្យរួចរាល់!`;
-
-      await fetch(`${botUrl}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: autoReplyText
-        })
-      });
+      await sendFastMessage(botUrl, chatId, null, autoReplyText, null);
 
       const usernameText = from.username ? `@${from.username}` : "គ្មាន";
       const customerName = `${from.first_name || ""} ${from.last_name || ""}`.trim();
       const caption = `🔔 **បង្កាន់ដៃទូទាត់ថ្មីពីអតិថិជន!**\n\n` +
         `- **ឈ្មោះ៖** ${customerName}\n` +
         `- **Username៖** ${usernameText}\n` +
-        `- **លេខវិក្កយបត្រ៖** #${billNo}\n` +
+        `- **លេខវិក្កយបត្រ៖** #${billNo || "មិនមាន"}\n` +
         `- **ទិញផលិតផល៖** ${prodTitle}\n` +
         `- **Chat ID៖** \`${chatId}\`\n\n` +
         `សូមពិនិត្យមើលរូបភាព រួចចុចប៊ូតុងខាងក្រោមដើម្បីសម្រេច៖`;
@@ -500,8 +427,8 @@ exports.handler = async (event, context) => {
       const keyboard = {
         inline_keyboard: [
           [
-            { text: "✅ យល់ព្រម & ផ្ញើគណនី", callback_data: `approve_${chatId}_${productId}_${billNo}` },
-            { text: "❌ បដិសេធ", callback_data: `reject_${chatId}_${billNo}` }
+            { text: "✅ យល់ព្រម & ផ្ញើគណនី", callback_data: `approve_${chatId}_${productId || 'all'}_${billNo || '000'}` },
+            { text: "❌ បដិសេធ", callback_data: `reject_${chatId}_${billNo || '000'}` }
           ]
         ]
       };
@@ -521,12 +448,7 @@ exports.handler = async (event, context) => {
       return { statusCode: 200, body: "OK" };
     }
 
-    // Default reply for text messages that are not starts
-    if (text) {
-      // If customer writes anything else, direct them to the main menu instead of standard warning
-      await sendMainMenu(botUrl, chatId);
-    }
-
+    // Do NOT send auto-spam messages for normal text chat messages
     return { statusCode: 200, body: "OK" };
   } catch (err) {
     console.error("Error in webhook handler:", err);
