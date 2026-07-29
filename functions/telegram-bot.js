@@ -320,7 +320,7 @@ function doPost(e) {
         "ប្រព័ន្ធបានផ្ញើបង្កាន់ដៃបាញ់លុយទៅកាន់អ្នកលក់ (Admin) ដើម្បីផ្ទៀងផ្ទាត់រួចរាល់ហើយ។ បងនឹងទទួលបានការបញ្ជាក់ និងឯកសារភ្លាមបន្ទាប់ពីអ្នកលក់ពិនិត្យរួចរាល់!";
       sendFastMessage(botUrl, chatId, null, autoReplyText, null, null);
 
-      if (chatId.toString() !== TELEGRAM_OWNER_CHAT_ID.toString()) {
+      if (true) {
         const customerName = ((from.first_name || "") + " " + (from.last_name || "")).trim();
         const usernameText = from.username ? "@" + from.username : "គ្មាន";
         const caption = "🔔 **បង្កាន់ដៃទូទាត់ថ្មីពីអតិថិជន!**\n\n" +

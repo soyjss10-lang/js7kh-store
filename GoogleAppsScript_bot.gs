@@ -1,36 +1,37 @@
 // ==============================================================================
 // JS7KH Store - Telegram Bot Google Apps Script (script.google.com)
-// របៀបប្រើប្រាស់៖
-// 1. ចូលទៅកាន់ https://script.google.com រួចបង្កើត New Project
-// 2. Copy កូដខាងក្រោមទាំងស្រុងទៅដាក់ក្នុង Google Apps Script
-// 3. ចុច Deploy -> New Deployment -> Select type: Web App
-// 4. ត្រង់ Execute as: ជ្រើសរើស "Me" | ត្រង់ Who has access: ជ្រើសរើស "Anyone"
-// 5. ចុច Deploy រួច Copy យក Web App URL នោះមក Run មុខងារ setWebhook() ខាងក្រោម។
+// BULLETPROOF HTML-MODE VERSION
 // ==============================================================================
 
 const TELEGRAM_BOT_TOKEN = "8670114174:AAGL8DPDl7tjEJzXF-hr2xYQ1pNZY8K7MKA";
 const TELEGRAM_OWNER_CHAT_ID = "1188063440";
 const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/soyjss10-lang/js7kh-store/main";
+const SELLER_CONTACT_URL = "https://t.me/SOYCHES7";
 
 const PRODUCTS = [
   {
     "id": "js7-gemini",
-    "title": "Link upgrade Account Gemini ធម្មតា ទៅជា Gemini Pro 5TB 18M",
+    "title": "Gemini 18 Month Link No Warranty",
     "category": "account",
     "categoryLabel": "UPGRADE ACCOUNT",
     "price": 4.99,
     "originalPrice": 35.00,
     "stockStatus": "in-stock",
+    "stock": 159,
+    "sold": 7636,
     "image": "assets/images/gemini.png",
-    "description": "Link upgrade Account Gemini ធម្មតា ទៅជា Gemini Pro 5TB 18M ល្បឿនលឿន ទំនុកចិត្ត 100% សម្រាប់ប្រើប្រាស់គណនី Google របស់អ្នកដើម្បីទទួល...",
-    "features": [
-      "១ គណនី (1 Account) = $4.99",
-      "២ គណនី (2 Accounts) = $7.99",
-      "៣ គណនី (3 Accounts) = $11.99",
-      "ទទួលបាន Google One Storage 5TB រយៈពេល 18 ខែ",
-      "ចូលប្រើប្រាស់ Gemini 1.5 Pro AI Advanced ឥតដែនកំណត់",
-      "សុវត្ថិភាព ១០០% លើអ៊ីមែលផ្ទាល់ខ្លួនរបស់អ្នក",
-      "ធានារយៈពេលពេញ 18 ខែ"
+    "description": "Click the link And activate it in a single click No need of Credit Card!!!\nActivate it immediately after purchase otherwise no warranty\n\nNote ⚠️ : Activate it under 30 min otherwise no Replacement will be given and Report the error within 30 min window otherwise no replacement or refund will be Provided Thanks 🙏",
+    "promotions": [
+      "Buy 29+ for $4.65",
+      "Buy 45+ for $4.60",
+      "Buy 100+ for $4.55",
+      "Buy 250+ for $4.50"
+    ],
+    "tierPricing": [
+      { "minQty": 250, "price": 4.50 },
+      { "minQty": 100, "price": 4.55 },
+      { "minQty": 45,  "price": 4.60 },
+      { "minQty": 29,  "price": 4.65 }
     ],
     "downloadLink": "https://t.me/SOYCHES7",
     "licenseKey": "JS7KH-GEMINI-5TB-7762-KEY"
@@ -43,13 +44,17 @@ const PRODUCTS = [
     "price": 19.99,
     "originalPrice": 99.00,
     "stockStatus": "in-stock",
+    "stock": 50,
+    "sold": 880,
     "image": "assets/images/canva.png",
-    "description": "CANVA Pro 1 ឆ្នាំ Subscription រយៈពេល ៣៦៥ ថ្ងៃ។ សម្រស់គណនីផ្ទាល់ខ្លួន (Private Account) និង គណនី Edu PRO...",
-    "features": [
-      "ទទួលបាន Premium Templates, Stock Photos & Fonts ឥតដែនកំណត់",
-      "គាំទ្រ Magic Studio AI Tools",
-      "គ្មាន Logo Watermark និង Export វីដេអូ/រូបភាព 4K",
-      "ធានារយៈពេលប្រើប្រាស់ពេញ ១ ឆ្នាំ"
+    "description": "CANVA Pro 1 ឆ្នាំ Subscription រយៈពេល ៣៦៥ ថ្ងៃ។ ប្រើប្រាស់គណនី Private ឬ Edu PRO មិនរញ៉េរញ៉ៃ ប្រើប្រាស់មុខងារ Pro ពេញលេញ (រួមទាំង AI គូររូប)។",
+    "promotions": [
+      "ទិញ 2+ ឡើងទៅ ចុះថ្លៃ $18.99/មួយ",
+      "ទិញ 5+ ឡើងទៅ ចុះថ្លៃ $17.50/មួយ"
+    ],
+    "tierPricing": [
+      { "minQty": 5, "price": 17.50 },
+      { "minQty": 2, "price": 18.99 }
     ],
     "downloadLink": "https://t.me/SOYCHES7",
     "licenseKey": "JS7KH-CANVA-PRO-1YEAR-VIP"
@@ -62,13 +67,17 @@ const PRODUCTS = [
     "price": 3.00,
     "originalPrice": 9.99,
     "stockStatus": "in-stock",
+    "stock": 100,
+    "sold": 2100,
     "image": "assets/images/capcut.png",
-    "description": "ប្រើប្រាស់មុខងារ PRO ពេញលេញ Export វីដេអូគ្មានសញ្ញាសម្គាល់ គ្មាន Watermark Effects...",
-    "features": [
-      "ទទួលបានរាល់ Pro Effects, Transitions & Filters",
-      "គាំទ្រ AI Auto Caption ភាសាខ្មែរ និង ភាសាបរទេស",
-      "គ្មាន Logo Watermark ពេល Export វីដេអូ 4K",
-      "ធានារយៈពេលប្រើប្រាស់ពេញ ១ ខែ"
+    "description": "ប្រើប្រាស់មុខងារ PRO ពេញលេញ Export វីដេអូគ្មានសញ្ញាសម្គាល់ គ្មាន Watermark Effects, Templates, Fonts & Transitions...",
+    "promotions": [
+      "ទិញ 3+ ឡើងទៅ ចុះថ្លៃ $2.50/មួយ",
+      "ទិញ 10+ ឡើងទៅ ចុះថ្លៃ $2.00/មួយ"
+    ],
+    "tierPricing": [
+      { "minQty": 10, "price": 2.00 },
+      { "minQty": 3,  "price": 2.50 }
     ],
     "downloadLink": "https://t.me/SOYCHES7",
     "licenseKey": "JS7KH-CAPCUT-PRO-3USD-VIP"
@@ -81,13 +90,15 @@ const PRODUCTS = [
     "price": 30.00,
     "originalPrice": 100.00,
     "stockStatus": "in-stock",
+    "stock": 10,
+    "sold": 340,
     "image": "assets/images/facebook_cm.png",
-    "description": "កាត់ឈ្មោះបានភ្លាមៗ Stars, Ads on Reels និង Partnership Ads... អាចរកចំណូលបានភ្លាមៗ...",
-    "features": [
-      "អ្នកតាមដានពិតប្រាកដ (Organic Followers) 100%",
-      "កាត់ឈ្មោះ និងផ្ទេរសិទ្ធិ Admin ភ្លាមៗ",
-      "ធានាសុវត្ថិភាព ១០០% លើការផ្ទេរកម្មសិទ្ធិ",
-      "គាំទ្រការប្រើប្រាស់ 24/7"
+    "description": "កាត់ឈ្មោះបានភ្លាមៗ Stars, Ads on Reels និង Partnership Ads... អាចរកចំណូលបានភ្លាមៗ។",
+    "promotions": [
+      "ទិញ 2+ ឡើងទៅ ចុះថ្លៃ $28.00/មួយ"
+    ],
+    "tierPricing": [
+      { "minQty": 2, "price": 28.00 }
     ],
     "downloadLink": "https://t.me/SOYCHES7",
     "licenseKey": "JS7KH-FB-ACC-ADS-VIP"
@@ -100,12 +111,15 @@ const PRODUCTS = [
     "price": 5.00,
     "originalPrice": 10.00,
     "stockStatus": "in-stock",
+    "stock": 25,
+    "sold": 120,
     "image": "assets/images/facebook_page_3_6.png",
-    "description": "អាចរត់អេដបាន Follower 10K និង 60K Views ជិតគ្រប់លក្ខខណ្ឌ (3/6 Criteria)...",
-    "features": [
-      " Follower 10K Real Organic",
-      "ជិតគ្រប់លក្ខខណ្ឌបើកប្រាក់ Finding Ads",
-      "ធានាផេកស្អាត គ្មានដែនកំណត់"
+    "description": "អាចរត់អេដបាន Follower 10K និង 60K Views ជិតគ្រប់លក្ខខណ្ឌ (3/6 Criteria) អាចរត់ Ads រកលុយបាន។",
+    "promotions": [
+      "ទិញ 5+ ឡើងទៅ ចុះថ្លៃ $4.50/មួយ"
+    ],
+    "tierPricing": [
+      { "minQty": 5, "price": 4.50 }
     ],
     "downloadLink": "https://t.me/SOYCHES7",
     "licenseKey": "JS7KH-FBPAGE-3-6-CRITERIA"
@@ -113,7 +127,7 @@ const PRODUCTS = [
 ];
 
 function setWebhook() {
-  const webAppUrl = "PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE"; // Replace with your deployed Web App URL
+  const webAppUrl = "https://script.google.com/macros/s/AKfycbxqV_xk-IVHUPglR6xTvF24vtk0ek-4lWnYXZuzpfkWpgVwXyZ6hPsXCyPSXbohLqQBoQ/exec";
   const url = "https://api.telegram.org/bot" + TELEGRAM_BOT_TOKEN + "/setWebhook?url=" + webAppUrl;
   const res = UrlFetchApp.fetch(url);
   Logger.log(res.getContentText());
@@ -123,11 +137,31 @@ function doGet(e) {
   return ContentService.createTextOutput("JS7KH Telegram Bot is running successfully!").setMimeType(ContentService.MimeType.TEXT);
 }
 
+function getUnitPrice(p, qty) {
+  if (p.tierPricing && p.tierPricing.length > 0) {
+    for (let i = 0; i < p.tierPricing.length; i++) {
+      if (qty >= p.tierPricing[i].minQty) {
+        return p.tierPricing[i].price;
+      }
+    }
+  }
+  return p.price;
+}
+
+function escapeHtml(text) {
+  if (!text) return "";
+  return text.toString()
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 function doPost(e) {
   try {
     const update = JSON.parse(e.postData.contents);
     const botUrl = "https://api.telegram.org/bot" + TELEGRAM_BOT_TOKEN;
 
+    // 1. Handle Callback Queries (Button Clicks)
     if (update.callback_query) {
       const query = update.callback_query;
       const data = query.data;
@@ -135,62 +169,194 @@ function doPost(e) {
       const chatId = message.chat.id;
       const messageId = message.message_id;
 
-      // Answer Callback Query immediately
-      UrlFetchApp.fetch(botUrl + "/answerCallbackQuery", {
-        method: "post",
-        contentType: "application/json",
-        payload: JSON.stringify({ callback_query_id: query.id })
-      });
+      try {
+        UrlFetchApp.fetch(botUrl + "/answerCallbackQuery", {
+          method: "post",
+          contentType: "application/json",
+          payload: JSON.stringify({ callback_query_id: query.id }),
+          muteHttpExceptions: true
+        });
+      } catch (err) {}
 
-      if (data === "menu_home") {
-        sendMainMenu(botUrl, chatId, messageId);
-      } else if (data.indexOf("cat_") === 0) {
-        sendCategoryView(botUrl, chatId, messageId, data.split("_")[1]);
+      if (data === "menu_home" || data === "cat_all") {
+        sendCategoryView(botUrl, chatId, messageId);
       } else if (data.indexOf("prod_") === 0) {
         sendProductDetail(botUrl, chatId, messageId, data.split("_")[1]);
-      } else if (data.indexOf("checkout_") === 0) {
-        sendCheckoutOptions(botUrl, chatId, messageId, data.split("_")[1]);
-      } else if (data.indexOf("pay_aba_") === 0) {
+      } else if (data.indexOf("pay_") === 0) {
         const parts = data.split("_");
-        sendPaymentDetails(botUrl, chatId, messageId, parts[2], parts[3], "aba");
-      } else if (data.indexOf("pay_crypto_") === 0) {
+        sendPaymentDetails(botUrl, chatId, messageId, parts[2], parts[3] || 1, parts[4] || 100000, parts[1]);
+      } else if (data.indexOf("approve_") === 0) {
         const parts = data.split("_");
-        sendPaymentDetails(botUrl, chatId, messageId, parts[2], parts[3], "crypto");
+        const customerChatId = parts[1];
+        const productId = parts[2];
+        const qty = parts[3] || 1;
+        const billNo = parts[4] || "000";
+
+        const p = PRODUCTS.find(function(item) { return item.id === productId; });
+        const prodTitle = p ? escapeHtml(p.title) : "កម្មវិធី/សេវាកម្ម";
+        const downloadLink = p ? p.downloadLink : SELLER_CONTACT_URL;
+        const licenseKey = p ? escapeHtml(p.licenseKey) : "JS7KH-PREMIUM-KEY";
+
+        const customerMsg = "🎉 <b>ការទូទាត់ប្រាក់របស់បងត្រូវបានអនុម័តជោគជ័យ!</b> (វិក្កយបត្រ៖ #" + billNo + ")\n\n" +
+          "📦 <b>ផលិតផល៖</b> " + prodTitle + " (ចំនួន: " + qty + ")\n" +
+          "🔑 <b>លេខកូដអាជ្ញាប័ណ្ណ (License Key)៖</b> <code>" + licenseKey + "</code>\n\n" +
+          "💬 <b>សូមចុចប៊ូតុងខាងក្រោមដើម្បីទាក់ទងមកកាន់អ្នកលក់ដើម្បីទទួលយកឯកសារ/គណនីដែលបានទិញ៖</b>";
+
+        const customerKeyboard = {
+          inline_keyboard: [
+            [{ text: "📩 ទាក់ទងអ្នកលក់ (Contact Seller)", url: SELLER_CONTACT_URL }],
+            [{ text: "📥 តំណភ្ជាប់ទាញយកឯកសារ", url: downloadLink }]
+          ]
+        };
+
+        sendFastMessage(botUrl, customerChatId, null, customerMsg, customerKeyboard, null);
+
+        const oldText = escapeHtml(message.caption || message.text || "");
+        const newCaption = oldText + "\n\n✅ <b>បានអនុម័ត និងផ្ញើប្រាប់អតិថិជនឱ្យទាក់ទងយកឯកសាររួចរាល់ហើយ!</b>";
+        if (message.photo) {
+          try {
+            UrlFetchApp.fetch(botUrl + "/editMessageCaption", {
+              method: "post",
+              contentType: "application/json",
+              payload: JSON.stringify({
+                chat_id: TELEGRAM_OWNER_CHAT_ID,
+                message_id: messageId,
+                caption: newCaption,
+                parse_mode: "HTML",
+                reply_markup: { inline_keyboard: [] }
+              }),
+              muteHttpExceptions: true
+            });
+          } catch (e) {}
+        }
+      } else if (data.indexOf("reject_") === 0) {
+        const parts = data.split("_");
+        const customerChatId = parts[1];
+        const billNo = parts[2];
+
+        const customerMsg = "❌ <b>ការទូទាត់ប្រាក់របស់បងមិនត្រូវបានអនុម័តឡើយ!</b> (វិក្កយបត្រ៖ #" + billNo + ")\n\n" +
+          "សូមពិនិត្យមើលរូបភាពបង្កាន់ដៃបាញ់លុយឡើងវិញ ឬទាក់ទងមកកាន់ Admin តាមរយៈ៖ " + SELLER_CONTACT_URL;
+
+        sendFastMessage(botUrl, customerChatId, null, customerMsg, {
+          inline_keyboard: [[{ text: "💬 ទំនាក់ទំនង Admin", url: SELLER_CONTACT_URL }]]
+        }, null);
+
+        const oldText = escapeHtml(message.caption || message.text || "");
+        const newCaption = oldText + "\n\n❌ <b>បានបដិសេធការទូទាត់ប្រាក់នេះ!</b>";
+        if (message.photo) {
+          try {
+            UrlFetchApp.fetch(botUrl + "/editMessageCaption", {
+              method: "post",
+              contentType: "application/json",
+              payload: JSON.stringify({
+                chat_id: TELEGRAM_OWNER_CHAT_ID,
+                message_id: messageId,
+                caption: newCaption,
+                parse_mode: "HTML",
+                reply_markup: { inline_keyboard: [] }
+              }),
+              muteHttpExceptions: true
+            });
+          } catch (e) {}
+        }
       }
 
       return ContentService.createTextOutput("OK");
     }
 
+    // 2. Handle Text & Photo Messages
     const message = update.message;
     if (!message) return ContentService.createTextOutput("OK");
 
     const chatId = message.chat.id;
     const text = message.text;
     const photo = message.photo;
+    const from = message.from;
 
-    if (text && (text.indexOf("/start") === 0 || text.indexOf("/menu") === 0 || text.indexOf("/shop") === 0)) {
-      sendCategoryView(botUrl, chatId, null, "all");
+    // Commands: /start, /menu, /shop, /help
+    if (text && (text.indexOf("/start") === 0 || text.indexOf("/menu") === 0 || text.indexOf("/shop") === 0 || text.indexOf("/help") === 0)) {
+      sendCategoryView(botUrl, chatId, null);
       return ContentService.createTextOutput("OK");
     }
 
+    // Numeric quantity text input (e.g. customer types "1" or "30")
+    if (text && /^[0-9]+$/.test(text.trim())) {
+      const customQty = parseInt(text.trim());
+      if (customQty > 0 && customQty <= 1000) {
+        let activeProdId = "js7-gemini";
+        try {
+          const cached = CacheService.getScriptCache().get("last_prod_" + chatId);
+          if (cached) activeProdId = cached;
+        } catch (e) {}
+
+        sendCheckoutOptions(botUrl, chatId, null, activeProdId, customQty);
+        return ContentService.createTextOutput("OK");
+      }
+    }
+
+    // Photo message (Payment receipt upload)
     if (photo && photo.length > 0) {
       const fileId = photo[photo.length - 1].file_id;
-      const autoReplyText = "សូមអរគុណសម្រាប់ការផ្ញើបង្កាន់ដៃទូទាត់ប្រាក់! ប្រព័ន្ធបានផ្ញើទៅកាន់អ្នកលក់ដើម្បីផ្ទៀងផ្ទាត់រួចរាល់ហើយបាទ។";
+      let productId = "js7-gemini";
+      try {
+        const cached = CacheService.getScriptCache().get("last_prod_" + chatId);
+        if (cached) productId = cached;
+      } catch (e) {}
+
+      let billNo = "";
+      let qty = "1";
+
+      if (message.reply_to_message) {
+        const replyText = message.reply_to_message.text || message.reply_to_message.caption || "";
+        const billMatch = replyText.match(/លេខវិក្កយបត្រ៖\s*#([0-9]+)/i) || replyText.match(/Bill ID:\s*#([0-9]+)/i);
+        const qtyMatch = replyText.match(/ចំនួន:\s*([0-9]+)/i) || replyText.match(/Quantity:\s*([0-9]+)/i);
+        if (billMatch) billNo = billMatch[1];
+        if (qtyMatch) qty = qtyMatch[1];
+      }
+
+      const p = PRODUCTS.find(function(item) { return item.id === productId; });
+      const prodTitle = p ? escapeHtml(p.title) : (productId || "សេវាកម្ម/កម្មវិធី");
+
+      const autoReplyText = "សូមអរគុណសម្រាប់ការផ្ញើបង្កាន់ដៃទូទាត់ប្រាក់ (" + prodTitle + ")!\n\n" +
+        "ប្រព័ន្ធបានផ្ញើបង្កាន់ដៃបាញ់លុយទៅកាន់អ្នកលក់ (Admin) ដើម្បីផ្ទៀងផ្ទាត់រួចរាល់ហើយ។ បងនឹងទទួលបានការបញ្ជាក់ និងឯកសារភ្លាមបន្ទាប់ពីអ្នកលក់ពិនិត្យរួចរាល់!";
       sendFastMessage(botUrl, chatId, null, autoReplyText, null, null);
 
-      if (chatId.toString() !== TELEGRAM_OWNER_CHAT_ID.toString()) {
-        const caption = "🔔 **បង្កាន់ដៃទូទាត់ថ្មីពីអតិថិជន!**\n- Chat ID: " + chatId;
-        UrlFetchApp.fetch(botUrl + "/sendPhoto", {
-          method: "post",
-          contentType: "application/json",
-          payload: JSON.stringify({
-            chat_id: TELEGRAM_OWNER_CHAT_ID,
-            photo: fileId,
-            caption: caption,
-            parse_mode: "Markdown"
-          })
-        });
+      if (true) {
+        const customerName = escapeHtml(((from.first_name || "") + " " + (from.last_name || "")).trim());
+        const usernameText = from.username ? "@" + escapeHtml(from.username) : "គ្មាន";
+        const caption = "🔔 <b>បង្កាន់ដៃទូទាត់ថ្មីពីអតិថិជន!</b>\n\n" +
+          "- <b>ឈ្មោះ៖</b> " + customerName + "\n" +
+          "- <b>Username៖</b> " + usernameText + "\n" +
+          "- <b>លេខវិក្កយបត្រ៖</b> #" + (billNo || "មិនមាន") + "\n" +
+          "- <b>ទិញផលិតផល៖</b> " + prodTitle + " (ចំនួន: " + qty + ")\n" +
+          "- <b>Chat ID៖</b> <code>" + chatId + "</code>\n\n" +
+          "សូមពិនិត្យមើលរូបភាព រួចចុចប៊ូតុងខាងក្រោមដើម្បីសម្រេច៖";
+
+        const keyboard = {
+          inline_keyboard: [
+            [
+              { text: "✅ យល់ព្រម & ផ្ញើគណនី", callback_data: "approve_" + chatId + "_" + (productId || "js7-gemini") + "_" + qty + "_" + (billNo || "000") },
+              { text: "❌ បដិសេធ", callback_data: "reject_" + chatId + "_" + (billNo || "000") }
+            ]
+          ]
+        };
+
+        try {
+          UrlFetchApp.fetch(botUrl + "/sendPhoto", {
+            method: "post",
+            contentType: "application/json",
+            payload: JSON.stringify({
+              chat_id: TELEGRAM_OWNER_CHAT_ID,
+              photo: fileId,
+              caption: caption,
+              parse_mode: "HTML",
+              reply_markup: keyboard
+            }),
+            muteHttpExceptions: true
+          });
+        } catch (e) {}
       }
+      return ContentService.createTextOutput("OK");
     }
 
     return ContentService.createTextOutput("OK");
@@ -204,13 +370,13 @@ function sendFastMessage(botUrl, chatId, messageId, text, keyboard, imageUrl) {
   const cleanImageUrl = imageUrl ? imageUrl.split('?')[0] : null;
   let contentText = text;
   if (cleanImageUrl) {
-    contentText = "[\u200B](" + cleanImageUrl + ")\n" + text;
+    contentText = "<a href=\"" + cleanImageUrl + "\">&#8203;</a>" + text;
   }
 
   const payload = {
     chat_id: chatId,
     text: contentText,
-    parse_mode: "Markdown",
+    parse_mode: "HTML",
     reply_markup: keyboard
   };
 
@@ -238,82 +404,131 @@ function sendFastMessage(botUrl, chatId, messageId, text, keyboard, imageUrl) {
   }
 
   delete payload.message_id;
-  UrlFetchApp.fetch(botUrl + "/sendMessage", {
-    method: "post",
-    contentType: "application/json",
-    payload: JSON.stringify(payload)
-  });
+  try {
+    UrlFetchApp.fetch(botUrl + "/sendMessage", {
+      method: "post",
+      contentType: "application/json",
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+  } catch (e) {}
 }
 
-function sendMainMenu(botUrl, chatId, messageId) {
-  const text = "👋 **សួស្តីបង! សូមស្វាគមន៍មកកាន់ JS7KH Store Bot!** 🇰🇭\n\nសូមជ្រើសរើសប្រភេទផលិតផលខាងក្រោមដើម្បីទិញ៖";
-  const keyboard = {
-    inline_keyboard: [
-      [
-        { text: "💳 UPGRADE ACCOUNT", callback_data: "cat_account" },
-        { text: "🛠️ TOOLS & SOFTWARES", callback_data: "cat_tools" }
-      ],
-      [
-        { text: "📱 FACEBOOK PAGES", callback_data: "cat_fb-page" },
-        { text: "📦 ផលិតផលទាំងអស់", callback_data: "cat_all" }
-      ],
-      [
-        { text: "📞 ទំនាក់ទំនងអ្នកលក់", url: "https://t.me/SOYCHES7" }
-      ]
-    ]
-  };
-  sendFastMessage(botUrl, chatId, messageId, text, keyboard, null);
-}
-
-function sendCategoryView(botUrl, chatId, messageId, categoryId) {
-  let filtered = PRODUCTS;
-  if (categoryId !== "all") {
-    filtered = PRODUCTS.filter(p => p.category === categoryId);
-  }
-  const text = "📂 **ប្រភេទផលិតផល**\n\nសូមជ្រើសរើសផលិតផលខាងក្រោម ដើម្បីមើលលម្អិត៖";
+function sendCategoryView(botUrl, chatId, messageId) {
+  const text = "🛍️ <b>AI TOOLS &amp; DIGITAL SERVICES STORE</b> 🔥\n\nសូមជ្រើសរើសកម្មវិធី/សេវាកម្មខាងក្រោម ដើម្បីទិញ៖";
   const inline_keyboard = [];
-  filtered.forEach(p => {
-    inline_keyboard.push([{ text: p.title + " - $" + p.price.toFixed(2), callback_data: "prod_" + p.id }]);
+  PRODUCTS.forEach(function(p) {
+    const priceFormatted = "$" + p.price.toFixed(2);
+    const stockText = p.stock !== undefined ? " | 📦 " + p.stock : "";
+    inline_keyboard.push([{ text: p.title + " | " + priceFormatted + stockText, callback_data: "prod_" + p.id }]);
   });
-  inline_keyboard.push([{ text: "🔙 ត្រឡប់ទៅម៉ឺនុយដើម", callback_data: "menu_home" }]);
+  inline_keyboard.push([{ text: "📞 ទំនាក់ទំនងអ្នកលក់ / Help", url: SELLER_CONTACT_URL }]);
   sendFastMessage(botUrl, chatId, messageId, text, { inline_keyboard: inline_keyboard }, null);
 }
 
 function sendProductDetail(botUrl, chatId, messageId, productId) {
-  const p = PRODUCTS.find(item => item.id === productId);
+  const p = PRODUCTS.find(function(item) { return item.id === productId; });
   if (!p) return;
+
+  try {
+    CacheService.getScriptCache().put("last_prod_" + chatId, productId, 600);
+  } catch (e) {}
+
   const imageUrl = GITHUB_RAW_BASE + "/" + p.image;
-  const caption = "🏷️ **" + p.title + "**\n\nℹ️ **ការពិពណ៌នា៖**\n" + p.description + "\n\n💰 **តម្លៃពិសេស៖** `$`" + p.price.toFixed(2) + " USD`";
+  const stockCount = p.stock !== undefined ? p.stock : 100;
+  const soldCount = p.sold !== undefined ? p.sold.toLocaleString() : "500";
+
+  let promotionsText = "";
+  if (p.promotions && p.promotions.length > 0) {
+    promotionsText = "\n🎁 <b>Promotions:</b>\n" + p.promotions.map(function(promo) { return "- " + escapeHtml(promo); }).join("\n") + "\n";
+  }
+
+  const caption = "1️⃣ <b>" + escapeHtml(p.title) + "</b>\n" +
+                  "💵 <b>Price:</b> <code>$" + p.price.toFixed(2) + "</code>\n" +
+                  "➕ <b>Stock:</b> " + stockCount + " accounts\n" +
+                  "📊 <b>Sold:</b> " + soldCount + " accounts\n\n" +
+                  "❞ <b>Description:</b>\n" + escapeHtml(p.description) + "\n❞\n" +
+                  promotionsText + "\n" +
+                  "✏️ <b>Enter quantity to buy (1-" + stockCount + "):</b>";
+
   const inline_keyboard = [
-    [{ text: "🛒 ទិញឥឡូវនេះ (Buy Now)", callback_data: "checkout_" + p.id }],
-    [{ text: "🔙 ត្រឡប់ក្រោយ", callback_data: "cat_" + p.category }]
+    [
+      { text: "🔙 ត្រឡប់ក្រោយ (Back)", callback_data: "cat_all" }
+    ]
   ];
+
   sendFastMessage(botUrl, chatId, messageId, caption, { inline_keyboard: inline_keyboard }, imageUrl);
 }
 
-function sendCheckoutOptions(botUrl, chatId, messageId, productId) {
-  const p = PRODUCTS.find(item => item.id === productId);
+function sendCheckoutOptions(botUrl, chatId, messageId, productId, qty) {
+  const p = PRODUCTS.find(function(item) { return item.id === productId; });
   if (!p) return;
+
+  const quantity = parseInt(qty) || 1;
+  const unitPrice = getUnitPrice(p, quantity);
+  const totalPrice = (unitPrice * quantity).toFixed(2);
   const billNo = Math.floor(100000 + Math.random() * 900000);
-  const text = "🛒 **ការបញ្ជាទិញ៖** " + p.title + "\n💰 **តម្លៃ៖** `$" + p.price.toFixed(2) + " USD`\nលេខវិក្កយបត្រ៖ #" + billNo;
+
+  const text = "🛒 <b>វិក្កយបត្របញ្ជាទិញ / ORDER SUMMARY</b>\n\n" +
+               "• <b>ផលិតផល៖</b> " + escapeHtml(p.title) + "\n" +
+               "• <b>ចំនួនទិញ៖</b> " + quantity + " អាខោន (តម្លៃរាយ: $" + unitPrice.toFixed(2) + ")\n" +
+               "• <b>តម្លៃសរុប៖</b> <b>$" + totalPrice + " USD</b>\n\n" +
+               "👇 <b>សូមជ្រើសរើសវិធីសាស្ត្រទូទាត់ប្រាក់ (Select Payment Method)៖</b>";
+
   const inline_keyboard = [
-    [{ text: "🏦 ABA Bank (ABA KHQR)", callback_data: "pay_aba_" + p.id + "_" + billNo }],
-    [{ text: "💰 Binance / USDT", callback_data: "pay_crypto_" + p.id + "_" + billNo }],
-    [{ text: "🔙 ត្រឡប់ក្រោយ", callback_data: "prod_" + p.id }]
+    [{ text: "🏦 ABA Bank (KHQR)", callback_data: "pay_aba_" + p.id + "_" + quantity + "_" + billNo }],
+    [{ text: "Pay with Binance", callback_data: "pay_binance_" + p.id + "_" + quantity + "_" + billNo }],
+    [{ text: "⚪ Pay with USDT (BEP20)", callback_data: "pay_usdtbep_" + p.id + "_" + quantity + "_" + billNo }],
+    [{ text: "⚪ Pay with USDT (TRC20)", callback_data: "pay_usdttrc_" + p.id + "_" + quantity + "_" + billNo }],
+    [{ text: "💰 Pay with Wallet", callback_data: "pay_wallet_" + p.id + "_" + quantity + "_" + billNo }],
+    [{ text: "🔙 ត្រឡប់ក្រោយ (Back)", callback_data: "prod_" + p.id }]
   ];
+
   sendFastMessage(botUrl, chatId, messageId, text, { inline_keyboard: inline_keyboard }, null);
 }
 
-function sendPaymentDetails(botUrl, chatId, messageId, productId, billNo, method) {
-  const p = PRODUCTS.find(item => item.id === productId);
+function sendPaymentDetails(botUrl, chatId, messageId, productId, qty, billNo, method) {
+  const p = PRODUCTS.find(function(item) { return item.id === productId; });
   if (!p) return;
-  let qrUrl = GITHUB_RAW_BASE + "/assets/images/user_aba_khqr.jpg";
-  let caption = "🏦 **ABA Bank Payment (KHQR)**\n\n• ឈ្មោះគណនី៖ **CHES SOY**\n• លេខគណនី ABA៖ `081 887 350`\n• ចំនួនទឹកប្រាក់៖ **$" + p.price.toFixed(2) + " USD**\n• លេខវិក្កយបត្រ៖ **#" + billNo + "**\n\n⚠️ សូមស្កែនរូបភាព ABA KHQR ខាងលើ ឬផ្ទេរប្រាក់ រួចផ្ញើ **រូបភាពបង្កាន់ដៃបង់ប្រាក់** មកកាន់ Chat នេះបាទ។";
 
-  if (method !== "aba") {
+  const quantity = parseInt(qty) || 1;
+  const unitPrice = getUnitPrice(p, quantity);
+  const totalPrice = (unitPrice * quantity).toFixed(2);
+
+  let caption = "";
+  let qrUrl = "";
+
+  const inline_keyboard = [
+    [{ text: "🔙 ត្រឡប់ក្រោយ", callback_data: "prod_" + p.id }]
+  ];
+
+  if (method === "aba") {
+    qrUrl = GITHUB_RAW_BASE + "/assets/images/user_aba_khqr.jpg";
+    caption = "🏦 <b>ABA Bank Payment (KHQR)</b>\n\n" +
+              "• ឈ្មោះគណនី៖ <b>CHES SOY</b>\n" +
+              "• លេខគណនី ABA៖ <code>081 887 350</code> (ចុចដើម្បីចម្លង)\n" +
+              "• ចំនួនទឹកប្រាក់សរុប៖ <b>$" + totalPrice + " USD</b>\n" +
+              "• លេខវិក្កយបត្រ៖ <b>#" + billNo + "</b>\n" +
+              "• ផលិតផល៖ <b>" + escapeHtml(p.title) + "</b> (ចំនួន: " + quantity + ")\n\n" +
+              "⚠️ <b>សូមស្កែនរូបភាព ABA KHQR កូដខាងលើ ឬផ្ទេរប្រាក់ រួចផ្ញើរូបភាពបង្កាន់ដៃបង់ប្រាក់ (Receipt Screenshot) មកកាន់ Chat នេះបាទ។</b>";
+  } else if (method === "binance" || method === "usdtbep" || method === "usdttrc") {
     qrUrl = GITHUB_RAW_BASE + "/assets/images/binance_qr.png";
-    caption = "💰 **Crypto / Binance Payment**\n\n• Binance ID៖ `294507047`\n• បណ្តាញ USDT៖ **TRC20 / BEP20**\n• ចំនួនទឹកប្រាក់៖ **$" + p.price.toFixed(2)} USD**\n• លេខវិក្កយបត្រ៖ **#" + billNo + "**\n\n⚠️ សូមស្កែនរូបភាព Binance QR ខាងលើ រួចផ្ញើ **រូបភាពបង្កាន់ដៃ** មកកាន់ Chat នេះបាទ។";
+    const networkInfo = method === "usdtbep" ? "BEP20" : (method === "usdttrc" ? "TRC20" : "Binance Pay / USDT");
+    caption = "Binance ID (tap to copy): <code>294507047</code>\n" +
+              "Amount to transfer: $" + totalPrice + "\n" +
+              "Network: <b>" + networkInfo + "</b>\n" +
+              "Bill ID: <b>#" + billNo + "</b>\n" +
+              "Product: <b>" + escapeHtml(p.title) + "</b> (" + quantity + "x)\n\n" +
+              "Please send the order ID or off-chain transaction reference (or screenshot photo) after payment for verification.";
+  } else {
+    qrUrl = GITHUB_RAW_BASE + "/assets/images/binance_qr.png";
+    caption = "💰 <b>Pay with Wallet / Admin Transfer</b>\n\n" +
+              "• Binance ID / Wallet: <code>294507047</code>\n" +
+              "• Amount to transfer: <b>$" + totalPrice + " USD</b>\n" +
+              "• Bill ID: <b>#" + billNo + "</b>\n" +
+              "• Product: <b>" + escapeHtml(p.title) + "</b> (" + quantity + "x)\n\n" +
+              "Please send the receipt screenshot or transaction reference after payment for verification.";
   }
 
-  sendFastMessage(botUrl, chatId, messageId, caption, { inline_keyboard: [[{ text: "🔙 ត្រឡប់ក្រោយ", callback_data: "checkout_" + p.id }]] }, qrUrl);
+  sendFastMessage(botUrl, chatId, messageId, caption, { inline_keyboard: inline_keyboard }, qrUrl);
 }

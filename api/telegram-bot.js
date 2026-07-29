@@ -449,7 +449,7 @@ module.exports = async (req, res) => {
         "ប្រព័ន្ធបានផ្ញើបង្កាន់ដៃបាញ់លុយទៅកាន់អ្នកលក់ (Admin) ដើម្បីផ្ទៀងផ្ទាត់រួចរាល់ហើយ។ បងនឹងទទួលបានការបញ្ជាក់ និងឯកសារភ្លាមបន្ទាប់ពីអ្នកលក់ពិនិត្យរួចរាល់!";
       await sendFastMessage(botUrl, chatId, null, autoReplyText, null, null);
 
-      if (chatId.toString() !== ownerChatId.toString()) {
+      if (true) { // Allow notification to owner for both customers and owner tests
         const customerName = escapeHtml(((from.first_name || "") + " " + (from.last_name || "")).trim());
         const usernameText = from.username ? "@" + escapeHtml(from.username) : "គ្មាន";
         const caption = "🔔 <b>បង្កាន់ដៃទូទាត់ថ្មីពីអតិថិជន!</b>\n\n" +
