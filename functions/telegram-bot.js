@@ -152,12 +152,34 @@ function doPost(e) {
     const update = JSON.parse(e.postData.contents);
     const botUrl = "https://api.telegram.org/bot" + TELEGRAM_BOT_TOKEN;
 
+    if (update.update_id) {
+      try {
+        const cacheKey = "upd_" + update.update_id;
+        const cache = CacheService.getScriptCache();
+        if (cache.get(cacheKey)) {
+          return ContentService.createTextOutput("OK");
+        }
+        cache.put(cacheKey, "processed", 300);
+      } catch (err) {}
+    }
+
     if (update.callback_query) {
       const query = update.callback_query;
       const data = query.data;
       const message = query.message;
       const chatId = message.chat.id;
       const messageId = message.message_id;
+
+      if (query.id) {
+        try {
+          const cbKey = "cb_" + query.id;
+          const cache = CacheService.getScriptCache();
+          if (cache.get(cbKey)) {
+            return ContentService.createTextOutput("OK");
+          }
+          cache.put(cbKey, "processed", 300);
+        } catch (err) {}
+      }
 
       UrlFetchApp.fetch(botUrl + "/answerCallbackQuery", {
         method: "post",
@@ -287,9 +309,32 @@ function doPost(e) {
     if (text && /^[0-9]+$/.test(text.trim())) {
       const customQty = parseInt(text.trim());
       if (customQty > 0 && customQty <= 1000) {
-        let activeProdId = CacheService.getScriptCache().get("last_prod_" + chatId);
+        let activeProdId = null;
+
+        if (message.reply_to_message) {
+          const replyText = message.reply_to_message.text || message.reply_to_message.caption || "";
+          for (let i = 0; i < PRODUCTS.length; i++) {
+            if (replyText.indexOf(PRODUCTS[i].title) !== -1 || replyText.indexOf(PRODUCTS[i].id) !== -1) {
+              activeProdId = PRODUCTS[i].id;
+              break;
+            }
+          }
+        }
+
         if (!activeProdId) {
-          activeProdId = "js7-gemini";
+          try {
+            activeProdId = CacheService.getScriptCache().get("last_prod_" + chatId);
+          } catch (e) {}
+        }
+
+        if (!activeProdId) {
+          const alertMsg = "🔴 **សូមជ្រើសរើស ផលិតផល/កម្មវិធី ដែលលោកអ្នកចង់ទិញជាមុនសិន!**\n\n" +
+            "សូមចុចប៊ូតុង **🛍️ មើលផលិតផលទាំងអស់** ខាងក្រោម ដើម្បីជ្រើសរើសផលិតផលដែលត្រូវទិញ។";
+          const keyboard = {
+            inline_keyboard: [[{ text: "🛍️ មើលផលិតផលទាំងអស់", callback_data: "cat_all" }]]
+          };
+          sendFastMessage(botUrl, chatId, null, alertMsg, keyboard, null);
+          return ContentService.createTextOutput("OK");
         }
 
         sendCheckoutOptions(botUrl, chatId, null, activeProdId, customQty);
@@ -299,18 +344,32 @@ function doPost(e) {
 
     if (photo && photo.length > 0) {
       const fileId = photo[photo.length - 1].file_id;
-      let productId = CacheService.getScriptCache().get("last_prod_" + chatId) || "js7-gemini";
+      let productId = null;
       let billNo = "";
       let qty = "1";
 
       if (message.reply_to_message) {
         const replyText = message.reply_to_message.text || message.reply_to_message.caption || "";
-        const prodMatch = replyText.match(/កូដ(?:ផលិតផល)?៖\s*`?\[([a-zA-Z0-9-]+)\]`?/i) || replyText.match(/Product:\s*\*\*([^\*]+)\*\*/i);
+        for (let i = 0; i < PRODUCTS.length; i++) {
+          if (replyText.indexOf(PRODUCTS[i].title) !== -1 || replyText.indexOf(PRODUCTS[i].id) !== -1) {
+            productId = PRODUCTS[i].id;
+            break;
+          }
+        }
         const billMatch = replyText.match(/លេខវិក្កយបត្រ៖\s*#([0-9]+)/i) || replyText.match(/Bill ID:\s*\*\*#([0-9]+)\*\*/i);
         const qtyMatch = replyText.match(/ចំនួន:\s*([0-9]+)/i) || replyText.match(/\(([0-9]+)x\)/i);
-        if (prodMatch) productId = prodMatch[1];
         if (billMatch) billNo = billMatch[1];
         if (qtyMatch) qty = qtyMatch[1];
+      }
+
+      if (!productId) {
+        try {
+          productId = CacheService.getScriptCache().get("last_prod_" + chatId);
+        } catch (e) {}
+      }
+
+      if (!productId) {
+        productId = "js7-gemini";
       }
 
       const p = PRODUCTS.find(function(item) { return item.id === productId; });
@@ -424,7 +483,7 @@ function sendProductDetail(botUrl, chatId, messageId, productId) {
   if (!p) return;
 
   try {
-    CacheService.getScriptCache().put("last_prod_" + chatId, productId, 600);
+    CacheService.getScriptCache().put("last_prod_" + chatId, productId, 21600);
   } catch (e) {}
 
   const imageUrl = GITHUB_RAW_BASE + "/" + p.image;
@@ -442,6 +501,8 @@ function sendProductDetail(botUrl, chatId, messageId, productId) {
                   "📊 **Sold:** " + soldCount + " accounts\n\n" +
                   "❞ **Description:**\n" + p.description + "\n❞\n" +
                   promotionsText + "\n" +
+                  "🔴 **សញ្ញាបញ្ជាក់របៀបទិញ (How to Buy):**\n" +
+                  "👉 **សូមវាយបញ្ជូន \"លេខចំនួន\" អាខោនដែលបងចង់ទិញ ចូលក្នុង Chat នេះ** (ឧទាហរណ៍៖ វាយលេខ `1` ឬ `2` ឬ `5` រួចចុច Send)\n\n" +
                   "✏️ **Enter quantity to buy (1-" + stockCount + "):**";
 
   const inline_keyboard = [

@@ -1,5 +1,6 @@
 const token = process.env.TELEGRAM_BOT_TOKEN || "8670114174:AAGL8DPDl7tjEJzXF-hr2xYQ1pNZY8K7MKA";
 const ownerChatId = process.env.TELEGRAM_OWNER_CHAT_ID || "1188063440";
+const userLastProduct = {};
 const products = [
   {
     "id": "js7-gemini",
@@ -202,6 +203,8 @@ async function sendProductDetail(botUrl, chatId, messageId, productId) {
   const p = products.find(function(item) { return item.id === productId; });
   if (!p) return;
 
+  userLastProduct[chatId] = productId;
+
   const imageUrl = GITHUB_RAW_BASE + "/" + p.image;
   const stockCount = p.stock !== undefined ? p.stock : 100;
   const soldCount = p.sold !== undefined ? p.sold.toLocaleString() : "500";
@@ -217,6 +220,8 @@ async function sendProductDetail(botUrl, chatId, messageId, productId) {
                   "📊 <b>Sold:</b> " + soldCount + " accounts\n\n" +
                   "❞ <b>Description:</b>\n" + escapeHtml(p.description) + "\n❞\n" +
                   promotionsText + "\n" +
+                  "🔴 <b>សញ្ញាបញ្ជាក់របៀបទិញ (How to Buy):</b>\n" +
+                  "👉 <b>សូមវាយបញ្ជូន \"លេខចំនួន\" អាខោនដែលបងចង់ទិញ ចូលក្នុង Chat នេះ</b> (ឧទាហរណ៍៖ វាយលេខ <code>1</code> ឬ <code>2</code> ឬ <code>5</code> រួចចុច Send)\n\n" +
                   "✏️ <b>Enter quantity to buy (1-" + stockCount + "):</b>";
 
   const inline_keyboard = [
@@ -302,13 +307,46 @@ async function sendPaymentDetails(botUrl, chatId, messageId, productId, qty, bil
 }
 
 module.exports = async (req, res) => {
+  if (req.method === "GET") {
+    const host = req.headers.host || "js7kh-store.vercel.app";
+    const protocol = req.headers["x-forwarded-proto"] || "https";
+    const currentUrl = `${protocol}://${host}/api/telegram-bot`;
+    const botUrl = "https://api.telegram.org/bot" + token;
+
+    if (req.query && req.query.setwebhook) {
+      const targetUrl = req.query.setwebhook === "true" ? currentUrl : req.query.setwebhook;
+      try {
+        const setRes = await fetch(botUrl + "/setWebhook?url=" + encodeURIComponent(targetUrl));
+        const setData = await setRes.json();
+        return res.status(200).json({
+          success: setData.ok,
+          message: "Webhook update status",
+          targetUrl: targetUrl,
+          telegramResponse: setData
+        });
+      } catch (err) {
+        return res.status(500).json({ error: err.toString() });
+      }
+    }
+
+    return res.status(200).send(`JS7KH Telegram Bot Vercel Endpoint is Live! Webhook URL: ${currentUrl}`);
+  }
+
   if (req.method !== "POST") {
-    return res.status(200).send("Only POST requests allowed");
+    return res.status(200).send("Only POST / GET requests allowed");
   }
 
   try {
     const update = req.body || {};
     const botUrl = "https://api.telegram.org/bot" + token;
+
+    if (update.update_id) {
+      const cacheKey = "upd_" + update.update_id;
+      if (userLastProduct[cacheKey]) {
+        return res.status(200).send("OK");
+      }
+      userLastProduct[cacheKey] = true;
+    }
 
     if (update.callback_query) {
       const query = update.callback_query;
@@ -316,6 +354,14 @@ module.exports = async (req, res) => {
       const message = query.message;
       const chatId = message.chat.id;
       const messageId = message.message_id;
+
+      if (query.id) {
+        const cbKey = "cb_" + query.id;
+        if (userLastProduct[cbKey]) {
+          return res.status(200).send("OK");
+        }
+        userLastProduct[cbKey] = true;
+      }
 
       fetch(botUrl + "/answerCallbackQuery", {
         method: "POST",
@@ -423,23 +469,63 @@ module.exports = async (req, res) => {
     if (text && /^[0-9]+$/.test(text.trim())) {
       const customQty = parseInt(text.trim());
       if (customQty > 0 && customQty <= 1000) {
-        await sendCheckoutOptions(botUrl, chatId, null, "js7-gemini", customQty);
+        let activeProdId = null;
+
+        if (message.reply_to_message) {
+          const replyText = message.reply_to_message.text || message.reply_to_message.caption || "";
+          for (let i = 0; i < products.length; i++) {
+            if (replyText.indexOf(products[i].title) !== -1 || replyText.indexOf(products[i].id) !== -1) {
+              activeProdId = products[i].id;
+              break;
+            }
+          }
+        }
+
+        if (!activeProdId && userLastProduct[chatId]) {
+          activeProdId = userLastProduct[chatId];
+        }
+
+        if (!activeProdId) {
+          const alertMsg = "🔴 <b>សូមជ្រើសរើស ផលិតផល/កម្មវិធី ដែលលោកអ្នកចង់ទិញជាមុនសិន!</b>\n\n" +
+            "សូមចុចប៊ូតុង <b>🛍️ មើលផលិតផលទាំងអស់</b> ខាងក្រោម ដើម្បីជ្រើសរើសផលិតផលដែលត្រូវទិញ។";
+          const keyboard = {
+            inline_keyboard: [[{ text: "🛍️ មើលផលិតផលទាំងអស់", callback_data: "cat_all" }]]
+          };
+          await sendFastMessage(botUrl, chatId, null, alertMsg, keyboard, null);
+          return res.status(200).send("OK");
+        }
+
+        await sendCheckoutOptions(botUrl, chatId, null, activeProdId, customQty);
         return res.status(200).send("OK");
       }
     }
 
     if (photo && photo.length > 0) {
       const fileId = photo[photo.length - 1].file_id;
-      let productId = "js7-gemini";
+      let productId = null;
       let billNo = "";
       let qty = "1";
 
       if (message.reply_to_message) {
         const replyText = message.reply_to_message.text || message.reply_to_message.caption || "";
+        for (let i = 0; i < products.length; i++) {
+          if (replyText.indexOf(products[i].title) !== -1 || replyText.indexOf(products[i].id) !== -1) {
+            productId = products[i].id;
+            break;
+          }
+        }
         const billMatch = replyText.match(/លេខវិក្កយបត្រ៖\s*#([0-9]+)/i) || replyText.match(/Bill ID:\s*#([0-9]+)/i);
         const qtyMatch = replyText.match(/ចំនួន:\s*([0-9]+)/i) || replyText.match(/Quantity:\s*([0-9]+)/i);
         if (billMatch) billNo = billMatch[1];
         if (qtyMatch) qty = qtyMatch[1];
+      }
+
+      if (!productId && userLastProduct[chatId]) {
+        productId = userLastProduct[chatId];
+      }
+
+      if (!productId) {
+        productId = "js7-gemini";
       }
 
       const p = products.find(function(item) { return item.id === productId; });

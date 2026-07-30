@@ -161,6 +161,18 @@ function doPost(e) {
     const update = JSON.parse(e.postData.contents);
     const botUrl = "https://api.telegram.org/bot" + TELEGRAM_BOT_TOKEN;
 
+    // Deduplication check: prevent Telegram retries from sending duplicate responses
+    if (update.update_id) {
+      try {
+        const cacheKey = "upd_" + update.update_id;
+        const cache = CacheService.getScriptCache();
+        if (cache.get(cacheKey)) {
+          return ContentService.createTextOutput("OK");
+        }
+        cache.put(cacheKey, "processed", 300);
+      } catch (err) {}
+    }
+
     // 1. Handle Callback Queries (Button Clicks)
     if (update.callback_query) {
       const query = update.callback_query;
@@ -168,6 +180,17 @@ function doPost(e) {
       const message = query.message;
       const chatId = message.chat.id;
       const messageId = message.message_id;
+
+      if (query.id) {
+        try {
+          const cbKey = "cb_" + query.id;
+          const cache = CacheService.getScriptCache();
+          if (cache.get(cbKey)) {
+            return ContentService.createTextOutput("OK");
+          }
+          cache.put(cbKey, "processed", 300);
+        } catch (err) {}
+      }
 
       try {
         UrlFetchApp.fetch(botUrl + "/answerCallbackQuery", {
@@ -283,11 +306,45 @@ function doPost(e) {
     if (text && /^[0-9]+$/.test(text.trim())) {
       const customQty = parseInt(text.trim());
       if (customQty > 0 && customQty <= 1000) {
-        let activeProdId = "js7-gemini";
-        try {
-          const cached = CacheService.getScriptCache().get("last_prod_" + chatId);
-          if (cached) activeProdId = cached;
-        } catch (e) {}
+        let activeProdId = null;
+
+        // A. Check reply_to_message
+        if (message.reply_to_message) {
+          const replyText = message.reply_to_message.text || message.reply_to_message.caption || "";
+          for (let i = 0; i < PRODUCTS.length; i++) {
+            if (replyText.indexOf(PRODUCTS[i].title) !== -1 || replyText.indexOf(PRODUCTS[i].id) !== -1) {
+              activeProdId = PRODUCTS[i].id;
+              break;
+            }
+          }
+        }
+
+        // B. Check CacheService
+        if (!activeProdId) {
+          try {
+            const cached = CacheService.getScriptCache().get("last_prod_" + chatId);
+            if (cached) activeProdId = cached;
+          } catch (e) {}
+        }
+
+        // C. Check PropertiesService
+        if (!activeProdId) {
+          try {
+            const prop = PropertiesService.getScriptProperties().getProperty("last_prod_" + chatId);
+            if (prop) activeProdId = prop;
+          } catch (e) {}
+        }
+
+        // D. Fallback: prompt user to select product if session expired/missing
+        if (!activeProdId) {
+          const alertMsg = "🔴 <b>សូមជ្រើសរើស ផលិតផល/កម្មវិធី ដែលលោកអ្នកចង់ទិញជាមុនសិន!</b>\n\n" +
+            "សូមចុចប៊ូតុង <b>🛍️ មើលផលិតផលទាំងអស់</b> ខាងក្រោម ដើម្បីជ្រើសរើសផលិតផលដែលត្រូវទិញ។";
+          const keyboard = {
+            inline_keyboard: [[{ text: "🛍️ មើលផលិតផលទាំងអស់", callback_data: "cat_all" }]]
+          };
+          sendFastMessage(botUrl, chatId, null, alertMsg, keyboard, null);
+          return ContentService.createTextOutput("OK");
+        }
 
         sendCheckoutOptions(botUrl, chatId, null, activeProdId, customQty);
         return ContentService.createTextOutput("OK");
@@ -297,21 +354,40 @@ function doPost(e) {
     // Photo message (Payment receipt upload)
     if (photo && photo.length > 0) {
       const fileId = photo[photo.length - 1].file_id;
-      let productId = "js7-gemini";
-      try {
-        const cached = CacheService.getScriptCache().get("last_prod_" + chatId);
-        if (cached) productId = cached;
-      } catch (e) {}
-
+      let productId = null;
       let billNo = "";
       let qty = "1";
 
       if (message.reply_to_message) {
         const replyText = message.reply_to_message.text || message.reply_to_message.caption || "";
+        for (let i = 0; i < PRODUCTS.length; i++) {
+          if (replyText.indexOf(PRODUCTS[i].title) !== -1 || replyText.indexOf(PRODUCTS[i].id) !== -1) {
+            productId = PRODUCTS[i].id;
+            break;
+          }
+        }
         const billMatch = replyText.match(/លេខវិក្កយបត្រ៖\s*#([0-9]+)/i) || replyText.match(/Bill ID:\s*#([0-9]+)/i);
         const qtyMatch = replyText.match(/ចំនួន:\s*([0-9]+)/i) || replyText.match(/Quantity:\s*([0-9]+)/i);
         if (billMatch) billNo = billMatch[1];
         if (qtyMatch) qty = qtyMatch[1];
+      }
+
+      if (!productId) {
+        try {
+          const cached = CacheService.getScriptCache().get("last_prod_" + chatId);
+          if (cached) productId = cached;
+        } catch (e) {}
+      }
+
+      if (!productId) {
+        try {
+          const prop = PropertiesService.getScriptProperties().getProperty("last_prod_" + chatId);
+          if (prop) productId = prop;
+        } catch (e) {}
+      }
+
+      if (!productId) {
+        productId = "js7-gemini";
       }
 
       const p = PRODUCTS.find(function(item) { return item.id === productId; });
@@ -431,7 +507,8 @@ function sendProductDetail(botUrl, chatId, messageId, productId) {
   if (!p) return;
 
   try {
-    CacheService.getScriptCache().put("last_prod_" + chatId, productId, 600);
+    CacheService.getScriptCache().put("last_prod_" + chatId, productId, 21600);
+    PropertiesService.getScriptProperties().setProperty("last_prod_" + chatId, productId);
   } catch (e) {}
 
   const imageUrl = GITHUB_RAW_BASE + "/" + p.image;
@@ -449,6 +526,8 @@ function sendProductDetail(botUrl, chatId, messageId, productId) {
                   "📊 <b>Sold:</b> " + soldCount + " accounts\n\n" +
                   "❞ <b>Description:</b>\n" + escapeHtml(p.description) + "\n❞\n" +
                   promotionsText + "\n" +
+                  "🔴 <b>សញ្ញាបញ្ជាក់របៀបទិញ (How to Buy):</b>\n" +
+                  "👉 <b>សូមវាយបញ្ជូន \"លេខចំនួន\" អាខោនដែលបងចង់ទិញ ចូលក្នុង Chat នេះ</b> (ឧទាហរណ៍៖ វាយលេខ <code>1</code> ឬ <code>2</code> ឬ <code>5</code> រួចចុច Send)\n\n" +
                   "✏️ <b>Enter quantity to buy (1-" + stockCount + "):</b>";
 
   const inline_keyboard = [
