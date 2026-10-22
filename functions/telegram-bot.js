@@ -499,7 +499,7 @@ function sendFastMessage(botUrl, chatId, messageId, text, keyboard, imageUrl) {
 }
 
 function sendCategoryView(botUrl, chatId, messageId) {
-  const text = "🛍️ <b>AI TOOLS &amp; DIGITAL SERVICES STORE</b> 🔥\n\nសូមជ្រើសរើសកម្មវិធី/សេវាកម្មខាងក្រោម ដើម្បីទិញ៖";
+  const text = "🛍️ <b>Jess Shop</b> 🔥\n\nសូមជ្រើសរើសកម្មវិធី/សេវាកម្មខាងក្រោម ដើម្បីទិញ៖";
   const inline_keyboard = [];
   PRODUCTS.forEach(function(p) {
     const priceFormatted = "$" + p.price.toFixed(2);
