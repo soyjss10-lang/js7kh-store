@@ -250,10 +250,7 @@ async function sendCheckoutOptions(botUrl, chatId, messageId, productId, qty) {
 
   const inline_keyboard = [
     [{ text: "🏦 ABA Bank (KHQR)", callback_data: "pay_aba_" + p.id + "_" + quantity + "_" + billNo }],
-    [{ text: "Pay with Binance", callback_data: "pay_binance_" + p.id + "_" + quantity + "_" + billNo }],
-    [{ text: "⚪ Pay with USDT (BEP20)", callback_data: "pay_usdtbep_" + p.id + "_" + quantity + "_" + billNo }],
-    [{ text: "⚪ Pay with USDT (TRC20)", callback_data: "pay_usdttrc_" + p.id + "_" + quantity + "_" + billNo }],
-    [{ text: "💰 Pay with Wallet", callback_data: "pay_wallet_" + p.id + "_" + quantity + "_" + billNo }],
+    [{ text: "🟡 Binance", callback_data: "pay_binance_" + p.id + "_" + quantity + "_" + billNo }],
     [{ text: "🔙 ត្រឡប់ក្រោយ (Back)", callback_data: "prod_" + p.id }]
   ];
 
@@ -284,23 +281,14 @@ async function sendPaymentDetails(botUrl, chatId, messageId, productId, qty, bil
               "• លេខវិក្កយបត្រ៖ <b>#" + billNo + "</b>\n" +
               "• ផលិតផល៖ <b>" + escapeHtml(p.title) + "</b> (ចំនួន: " + quantity + ")\n\n" +
               "⚠️ <b>សូមស្កែនរូបភាព ABA KHQR កូដខាងលើ ឬផ្ទេរប្រាក់ រួចផ្ញើរូបភាពបង្កាន់ដៃបង់ប្រាក់ (Receipt Screenshot) មកកាន់ Chat នេះបាទ។</b>";
-  } else if (method === "binance" || method === "usdtbep" || method === "usdttrc") {
-    qrUrl = GITHUB_RAW_BASE + "/assets/images/binance_qr.png";
-    const networkInfo = method === "usdtbep" ? "BEP20" : (method === "usdttrc" ? "TRC20" : "Binance Pay / USDT");
-    caption = "Binance ID (tap to copy): <code>294507047</code>\n" +
-              "Amount to transfer: $" + totalPrice + "\n" +
-              "Network: <b>" + networkInfo + "</b>\n" +
-              "Bill ID: <b>#" + billNo + "</b>\n" +
-              "Product: <b>" + escapeHtml(p.title) + "</b> (" + quantity + "x)\n\n" +
-              "Please send the order ID or off-chain transaction reference (or screenshot photo) after payment for verification.";
   } else {
     qrUrl = GITHUB_RAW_BASE + "/assets/images/binance_qr.png";
-    caption = "💰 <b>Pay with Wallet / Admin Transfer</b>\n\n" +
-              "• Binance ID / Wallet: <code>294507047</code>\n" +
-              "• Amount to transfer: <b>$" + totalPrice + " USD</b>\n" +
-              "• Bill ID: <b>#" + billNo + "</b>\n" +
-              "• Product: <b>" + escapeHtml(p.title) + "</b> (" + quantity + "x)\n\n" +
-              "Please send the receipt screenshot or transaction reference after payment for verification.";
+    caption = "🟡 <b>Binance Payment</b>\n\n" +
+              "• Binance ID (ចុចដើម្បីចម្លង)៖ <code>294507047</code>\n" +
+              "• ចំនួនទឹកប្រាក់ត្រូវផ្ទេរ៖ <b>$" + totalPrice + " USD</b>\n" +
+              "• លេខវិក្កយបត្រ៖ <b>#" + billNo + "</b>\n" +
+              "• ផលិតផល៖ <b>" + escapeHtml(p.title) + "</b> (ចំនួន: " + quantity + ")\n\n" +
+              "⚠️ <b>សូមផ្ទេរប្រាក់តាម Binance ID ខាងលើ រួចផ្ញើរូបភាពបង្កាន់ដៃបង់ប្រាក់ (Screenshot) ឬ TxID មកកាន់ Chat នេះដើម្បីផ្ទៀងផ្ទាត់បាទ។</b>";
   }
 
   await sendFastMessage(botUrl, chatId, messageId, caption, { inline_keyboard: inline_keyboard }, qrUrl);
@@ -316,7 +304,14 @@ module.exports = async (req, res) => {
     if (req.query && req.query.setwebhook) {
       const targetUrl = req.query.setwebhook === "true" ? currentUrl : req.query.setwebhook;
       try {
-        const setRes = await fetch(botUrl + "/setWebhook?url=" + encodeURIComponent(targetUrl));
+        const setRes = await fetch(botUrl + "/setWebhook", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            url: targetUrl,
+            allowed_updates: ["message", "callback_query"]
+          })
+        });
         const setData = await setRes.json();
         return res.status(200).json({
           success: setData.ok,

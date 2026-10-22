@@ -1,5 +1,6 @@
 // ==============================================================================
 // JS7KH Store - Telegram Bot Google Apps Script (script.google.com)
+// BULLETPROOF HTML-MODE VERSION
 // ==============================================================================
 
 const TELEGRAM_BOT_TOKEN = "8670114174:AAGL8DPDl7tjEJzXF-hr2xYQ1pNZY8K7MKA";
@@ -127,8 +128,16 @@ const PRODUCTS = [
 
 function setWebhook() {
   const webAppUrl = "https://script.google.com/macros/s/AKfycbxqV_xk-IVHUPglR6xTvF24vtk0ek-4lWnYXZuzpfkWpgVwXyZ6hPsXCyPSXbohLqQBoQ/exec";
-  const url = "https://api.telegram.org/bot" + TELEGRAM_BOT_TOKEN + "/setWebhook?url=" + webAppUrl;
-  const res = UrlFetchApp.fetch(url);
+  const url = "https://api.telegram.org/bot" + TELEGRAM_BOT_TOKEN + "/setWebhook";
+  const payload = {
+    url: webAppUrl,
+    allowed_updates: ["message", "callback_query"]
+  };
+  const res = UrlFetchApp.fetch(url, {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify(payload)
+  });
   Logger.log(res.getContentText());
 }
 
@@ -147,11 +156,20 @@ function getUnitPrice(p, qty) {
   return p.price;
 }
 
+function escapeHtml(text) {
+  if (!text) return "";
+  return text.toString()
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 function doPost(e) {
   try {
     const update = JSON.parse(e.postData.contents);
     const botUrl = "https://api.telegram.org/bot" + TELEGRAM_BOT_TOKEN;
 
+    // Deduplication check: prevent Telegram retries from sending duplicate responses
     if (update.update_id) {
       try {
         const cacheKey = "upd_" + update.update_id;
@@ -163,6 +181,7 @@ function doPost(e) {
       } catch (err) {}
     }
 
+    // 1. Handle Callback Queries (Button Clicks)
     if (update.callback_query) {
       const query = update.callback_query;
       const data = query.data;
@@ -181,19 +200,19 @@ function doPost(e) {
         } catch (err) {}
       }
 
-      UrlFetchApp.fetch(botUrl + "/answerCallbackQuery", {
-        method: "post",
-        contentType: "application/json",
-        payload: JSON.stringify({ callback_query_id: query.id })
-      });
+      try {
+        UrlFetchApp.fetch(botUrl + "/answerCallbackQuery", {
+          method: "post",
+          contentType: "application/json",
+          payload: JSON.stringify({ callback_query_id: query.id }),
+          muteHttpExceptions: true
+        });
+      } catch (err) {}
 
       if (data === "menu_home" || data === "cat_all") {
-        sendCategoryView(botUrl, chatId, messageId, "all");
+        sendCategoryView(botUrl, chatId, messageId);
       } else if (data.indexOf("prod_") === 0) {
         sendProductDetail(botUrl, chatId, messageId, data.split("_")[1]);
-      } else if (data.indexOf("qty_") === 0) {
-        const parts = data.split("_");
-        sendCheckoutOptions(botUrl, chatId, messageId, parts[1], parts[2] || 1);
       } else if (data.indexOf("pay_") === 0) {
         const parts = data.split("_");
         sendPaymentDetails(botUrl, chatId, messageId, parts[2], parts[3] || 1, parts[4] || 100000, parts[1]);
@@ -205,71 +224,78 @@ function doPost(e) {
         const billNo = parts[4] || "000";
 
         const p = PRODUCTS.find(function(item) { return item.id === productId; });
-        const prodTitle = p ? p.title : "កម្មវិធី/សេវាកម្ម";
+        const prodTitle = p ? escapeHtml(p.title) : "កម្មវិធី/សេវាកម្ម";
         const downloadLink = p ? p.downloadLink : SELLER_CONTACT_URL;
-        const licenseKey = p ? p.licenseKey : "JS7KH-PREMIUM-KEY";
+        const licenseKey = p ? escapeHtml(p.licenseKey) : "JS7KH-PREMIUM-KEY";
 
-        const customerMsg = "🎉 **ការទូទាត់ប្រាក់របស់បងត្រូវបានអនុម័តជោគជ័យ!** (វិក្កយបត្រ៖ #" + billNo + ")\n\n" +
-          "📦 **ផលិតផល៖** " + prodTitle + " (ចំនួន: " + qty + ")\n" +
-          "🔑 **លេខកូដអាជ្ញាប័ណ្ណ (License Key)៖** `" + licenseKey + "`\n\n" +
-          "💬 **សូមចុចប៊ូតុងខាងក្រោមដើម្បីទាក់ទងមកកាន់អ្នកលក់ដើម្បីទទួលយកឯកសារ/គណនីដែលបានទិញ៖**";
+        const customerMsg = "🎉 <b>ការទូទាត់ប្រាក់របស់បងត្រូវបានអនុម័តជោគជ័យ!</b> (វិក្កយបត្រ៖ #" + billNo + ")\n\n" +
+          "📦 <b>ផលិតផល៖</b> " + prodTitle + " (ចំនួន: " + qty + ")\n" +
+          "🔑 <b>លេខកូដអាជ្ញាប័ណ្ណ (License Key)៖</b> <code>" + licenseKey + "</code>\n\n" +
+          "💬 <b>សូមចុចប៊ូតុងខាងក្រោមដើម្បីទាក់ទងមកកាន់អ្នកលក់ដើម្បីទទួលយកឯកសារ/គណនីដែលបានទិញ៖</b>";
 
         const customerKeyboard = {
           inline_keyboard: [
-            [
-              { text: "📩 ទាក់ទងអ្នកលក់ (Contact Seller)", url: SELLER_CONTACT_URL }
-            ],
-            [
-              { text: "📥 តំណភ្ជាប់ទាញយកឯកសារ", url: downloadLink }
-            ]
+            [{ text: "📩 ទាក់ទងអ្នកលក់ (Contact Seller)", url: SELLER_CONTACT_URL }],
+            [{ text: "📥 តំណភ្ជាប់ទាញយកឯកសារ", url: downloadLink }]
           ]
         };
 
         sendFastMessage(botUrl, customerChatId, null, customerMsg, customerKeyboard, null);
 
-        const newCaption = (message.caption || message.text || "") + "\n\n✅ **បានអនុម័ត និងផ្ញើប្រាប់អតិថិជនឱ្យទាក់ទងយកឯកសាររួចរាល់ហើយ!**";
+        const oldText = escapeHtml(message.caption || message.text || "");
+        const newCaption = oldText + "\n\n✅ <b>បានអនុម័ត និងផ្ញើប្រាប់អតិថិជនឱ្យទាក់ទងយកឯកសាររួចរាល់ហើយ!</b>";
         if (message.photo) {
-          UrlFetchApp.fetch(botUrl + "/editMessageCaption", {
-            method: "post",
-            contentType: "application/json",
-            payload: JSON.stringify({
-              chat_id: TELEGRAM_OWNER_CHAT_ID,
-              message_id: messageId,
-              caption: newCaption,
-              reply_markup: { inline_keyboard: [] }
-            })
-          });
+          try {
+            UrlFetchApp.fetch(botUrl + "/editMessageCaption", {
+              method: "post",
+              contentType: "application/json",
+              payload: JSON.stringify({
+                chat_id: TELEGRAM_OWNER_CHAT_ID,
+                message_id: messageId,
+                caption: newCaption,
+                parse_mode: "HTML",
+                reply_markup: { inline_keyboard: [] }
+              }),
+              muteHttpExceptions: true
+            });
+          } catch (e) {}
         }
       } else if (data.indexOf("reject_") === 0) {
         const parts = data.split("_");
         const customerChatId = parts[1];
         const billNo = parts[2];
 
-        const customerMsg = "❌ **ការទូទាត់ប្រាក់របស់បងមិនត្រូវបានអនុម័តឡើយ!** (វិក្កយបត្រ៖ #" + billNo + ")\n\n" +
+        const customerMsg = "❌ <b>ការទូទាត់ប្រាក់របស់បងមិនត្រូវបានអនុម័តឡើយ!</b> (វិក្កយបត្រ៖ #" + billNo + ")\n\n" +
           "សូមពិនិត្យមើលរូបភាពបង្កាន់ដៃបាញ់លុយឡើងវិញ ឬទាក់ទងមកកាន់ Admin តាមរយៈ៖ " + SELLER_CONTACT_URL;
 
         sendFastMessage(botUrl, customerChatId, null, customerMsg, {
           inline_keyboard: [[{ text: "💬 ទំនាក់ទំនង Admin", url: SELLER_CONTACT_URL }]]
         }, null);
 
-        const newCaption = (message.caption || message.text || "") + "\n\n❌ **បានបដិសេធការទូទាត់ប្រាក់នេះ!**";
+        const oldText = escapeHtml(message.caption || message.text || "");
+        const newCaption = oldText + "\n\n❌ <b>បានបដិសេធការទូទាត់ប្រាក់នេះ!</b>";
         if (message.photo) {
-          UrlFetchApp.fetch(botUrl + "/editMessageCaption", {
-            method: "post",
-            contentType: "application/json",
-            payload: JSON.stringify({
-              chat_id: TELEGRAM_OWNER_CHAT_ID,
-              message_id: messageId,
-              caption: newCaption,
-              reply_markup: { inline_keyboard: [] }
-            })
-          });
+          try {
+            UrlFetchApp.fetch(botUrl + "/editMessageCaption", {
+              method: "post",
+              contentType: "application/json",
+              payload: JSON.stringify({
+                chat_id: TELEGRAM_OWNER_CHAT_ID,
+                message_id: messageId,
+                caption: newCaption,
+                parse_mode: "HTML",
+                reply_markup: { inline_keyboard: [] }
+              }),
+              muteHttpExceptions: true
+            });
+          } catch (e) {}
         }
       }
 
       return ContentService.createTextOutput("OK");
     }
 
+    // 2. Handle Text & Photo Messages
     const message = update.message;
     if (!message) return ContentService.createTextOutput("OK");
 
@@ -278,39 +304,19 @@ function doPost(e) {
     const photo = message.photo;
     const from = message.from;
 
+    // Commands: /start, /menu, /shop, /help
     if (text && (text.indexOf("/start") === 0 || text.indexOf("/menu") === 0 || text.indexOf("/shop") === 0 || text.indexOf("/help") === 0)) {
-      const parts = text.split(" ");
-      if (parts.length > 1) {
-        const param = parts[1];
-        const prodMatch = param.match(/prod_([a-zA-Z0-9-]+)/i);
-        const billMatch = param.match(/bill_([0-9]+)/i);
-
-        const productId = prodMatch ? prodMatch[1] : "";
-        const billNo = billMatch ? billMatch[1] : "";
-
-        if (productId) {
-          sendProductDetail(botUrl, chatId, null, productId);
-          return ContentService.createTextOutput("OK");
-        } else if (billNo) {
-          const welcomeMsg = "👋 **សួស្តីបង " + (from.first_name || "") + "!** សូមស្វាគមន៍មកកាន់ JS7KH Store Bot! 🇰🇭\n\n" +
-            "🧾 **លេខវិក្កយបត្រ៖** #" + billNo + "\n\n" +
-            "⚠️ សូមផ្ញើរូបភាពបង្កាន់ដៃបាញ់លុយ (Receipt Screenshot) មកកាន់ Chat នេះដើម្បីឱ្យអ្នកលក់ផ្ទៀងផ្ទាត់។";
-          sendFastMessage(botUrl, chatId, null, welcomeMsg, {
-            inline_keyboard: [[{ text: "🛍️ មើលផលិតផលទាំងអស់", callback_data: "cat_all" }]]
-          }, null);
-          return ContentService.createTextOutput("OK");
-        }
-      }
-
-      sendCategoryView(botUrl, chatId, null, "all");
+      sendCategoryView(botUrl, chatId, null);
       return ContentService.createTextOutput("OK");
     }
 
+    // Numeric quantity text input (e.g. customer types "1" or "30")
     if (text && /^[0-9]+$/.test(text.trim())) {
       const customQty = parseInt(text.trim());
       if (customQty > 0 && customQty <= 1000) {
         let activeProdId = null;
 
+        // A. Check reply_to_message
         if (message.reply_to_message) {
           const replyText = message.reply_to_message.text || message.reply_to_message.caption || "";
           for (let i = 0; i < PRODUCTS.length; i++) {
@@ -321,15 +327,26 @@ function doPost(e) {
           }
         }
 
+        // B. Check CacheService
         if (!activeProdId) {
           try {
-            activeProdId = CacheService.getScriptCache().get("last_prod_" + chatId);
+            const cached = CacheService.getScriptCache().get("last_prod_" + chatId);
+            if (cached) activeProdId = cached;
           } catch (e) {}
         }
 
+        // C. Check PropertiesService
         if (!activeProdId) {
-          const alertMsg = "🔴 **សូមជ្រើសរើស ផលិតផល/កម្មវិធី ដែលលោកអ្នកចង់ទិញជាមុនសិន!**\n\n" +
-            "សូមចុចប៊ូតុង **🛍️ មើលផលិតផលទាំងអស់** ខាងក្រោម ដើម្បីជ្រើសរើសផលិតផលដែលត្រូវទិញ។";
+          try {
+            const prop = PropertiesService.getScriptProperties().getProperty("last_prod_" + chatId);
+            if (prop) activeProdId = prop;
+          } catch (e) {}
+        }
+
+        // D. Fallback: prompt user to select product if session expired/missing
+        if (!activeProdId) {
+          const alertMsg = "🔴 <b>សូមជ្រើសរើស ផលិតផល/កម្មវិធី ដែលលោកអ្នកចង់ទិញជាមុនសិន!</b>\n\n" +
+            "សូមចុចប៊ូតុង <b>🛍️ មើលផលិតផលទាំងអស់</b> ខាងក្រោម ដើម្បីជ្រើសរើសផលិតផលដែលត្រូវទិញ។";
           const keyboard = {
             inline_keyboard: [[{ text: "🛍️ មើលផលិតផលទាំងអស់", callback_data: "cat_all" }]]
           };
@@ -342,6 +359,7 @@ function doPost(e) {
       }
     }
 
+    // Photo message (Payment receipt upload)
     if (photo && photo.length > 0) {
       const fileId = photo[photo.length - 1].file_id;
       let productId = null;
@@ -356,15 +374,23 @@ function doPost(e) {
             break;
           }
         }
-        const billMatch = replyText.match(/លេខវិក្កយបត្រ៖\s*#([0-9]+)/i) || replyText.match(/Bill ID:\s*\*\*#([0-9]+)\*\*/i);
-        const qtyMatch = replyText.match(/ចំនួន:\s*([0-9]+)/i) || replyText.match(/\(([0-9]+)x\)/i);
+        const billMatch = replyText.match(/លេខវិក្កយបត្រ៖\s*#([0-9]+)/i) || replyText.match(/Bill ID:\s*#([0-9]+)/i);
+        const qtyMatch = replyText.match(/ចំនួន:\s*([0-9]+)/i) || replyText.match(/Quantity:\s*([0-9]+)/i);
         if (billMatch) billNo = billMatch[1];
         if (qtyMatch) qty = qtyMatch[1];
       }
 
       if (!productId) {
         try {
-          productId = CacheService.getScriptCache().get("last_prod_" + chatId);
+          const cached = CacheService.getScriptCache().get("last_prod_" + chatId);
+          if (cached) productId = cached;
+        } catch (e) {}
+      }
+
+      if (!productId) {
+        try {
+          const prop = PropertiesService.getScriptProperties().getProperty("last_prod_" + chatId);
+          if (prop) productId = prop;
         } catch (e) {}
       }
 
@@ -373,43 +399,46 @@ function doPost(e) {
       }
 
       const p = PRODUCTS.find(function(item) { return item.id === productId; });
-      const prodTitle = p ? p.title : (productId || "សេវាកម្ម/កម្មវិធី");
+      const prodTitle = p ? escapeHtml(p.title) : (productId || "សេវាកម្ម/កម្មវិធី");
 
       const autoReplyText = "សូមអរគុណសម្រាប់ការផ្ញើបង្កាន់ដៃទូទាត់ប្រាក់ (" + prodTitle + ")!\n\n" +
         "ប្រព័ន្ធបានផ្ញើបង្កាន់ដៃបាញ់លុយទៅកាន់អ្នកលក់ (Admin) ដើម្បីផ្ទៀងផ្ទាត់រួចរាល់ហើយ។ បងនឹងទទួលបានការបញ្ជាក់ និងឯកសារភ្លាមបន្ទាប់ពីអ្នកលក់ពិនិត្យរួចរាល់!";
       sendFastMessage(botUrl, chatId, null, autoReplyText, null, null);
 
       if (true) {
-        const customerName = ((from.first_name || "") + " " + (from.last_name || "")).trim();
-        const usernameText = from.username ? "@" + from.username : "គ្មាន";
-        const caption = "🔔 **បង្កាន់ដៃទូទាត់ថ្មីពីអតិថិជន!**\n\n" +
-          "- **ឈ្មោះ៖** " + customerName + "\n" +
-          "- **Username៖** " + usernameText + "\n" +
-          "- **លេខវិក្កយបត្រ៖** #" + (billNo || "មិនមាន") + "\n" +
-          "- **ទិញផលិតផល៖** " + prodTitle + " (ចំនួន: " + qty + ")\n" +
-          "- **Chat ID៖** `" + chatId + "`\n\n" +
+        const customerName = escapeHtml(((from.first_name || "") + " " + (from.last_name || "")).trim());
+        const usernameText = from.username ? "@" + escapeHtml(from.username) : "គ្មាន";
+        const caption = "🔔 <b>បង្កាន់ដៃទូទាត់ថ្មីពីអតិថិជន!</b>\n\n" +
+          "- <b>ឈ្មោះ៖</b> " + customerName + "\n" +
+          "- <b>Username៖</b> " + usernameText + "\n" +
+          "- <b>លេខវិក្កយបត្រ៖</b> #" + (billNo || "មិនមាន") + "\n" +
+          "- <b>ទិញផលិតផល៖</b> " + prodTitle + " (ចំនួន: " + qty + ")\n" +
+          "- <b>Chat ID៖</b> <code>" + chatId + "</code>\n\n" +
           "សូមពិនិត្យមើលរូបភាព រួចចុចប៊ូតុងខាងក្រោមដើម្បីសម្រេច៖";
 
         const keyboard = {
           inline_keyboard: [
             [
-              { text: "✅ យល់ព្រម & ផ្ញើគណនី", callback_data: "approve_" + chatId + "_" + (productId || "all") + "_" + qty + "_" + (billNo || "000") },
+              { text: "✅ យល់ព្រម & ផ្ញើគណនី", callback_data: "approve_" + chatId + "_" + (productId || "js7-gemini") + "_" + qty + "_" + (billNo || "000") },
               { text: "❌ បដិសេធ", callback_data: "reject_" + chatId + "_" + (billNo || "000") }
             ]
           ]
         };
 
-        UrlFetchApp.fetch(botUrl + "/sendPhoto", {
-          method: "post",
-          contentType: "application/json",
-          payload: JSON.stringify({
-            chat_id: TELEGRAM_OWNER_CHAT_ID,
-            photo: fileId,
-            caption: caption,
-            parse_mode: "Markdown",
-            reply_markup: keyboard
-          })
-        });
+        try {
+          UrlFetchApp.fetch(botUrl + "/sendPhoto", {
+            method: "post",
+            contentType: "application/json",
+            payload: JSON.stringify({
+              chat_id: TELEGRAM_OWNER_CHAT_ID,
+              photo: fileId,
+              caption: caption,
+              parse_mode: "HTML",
+              reply_markup: keyboard
+            }),
+            muteHttpExceptions: true
+          });
+        } catch (e) {}
       }
       return ContentService.createTextOutput("OK");
     }
@@ -425,13 +454,13 @@ function sendFastMessage(botUrl, chatId, messageId, text, keyboard, imageUrl) {
   const cleanImageUrl = imageUrl ? imageUrl.split('?')[0] : null;
   let contentText = text;
   if (cleanImageUrl) {
-    contentText = "[\u200B](" + cleanImageUrl + ")\n" + text;
+    contentText = "<a href=\"" + cleanImageUrl + "\">&#8203;</a>" + text;
   }
 
   const payload = {
     chat_id: chatId,
     text: contentText,
-    parse_mode: "Markdown",
+    parse_mode: "HTML",
     reply_markup: keyboard
   };
 
@@ -459,15 +488,18 @@ function sendFastMessage(botUrl, chatId, messageId, text, keyboard, imageUrl) {
   }
 
   delete payload.message_id;
-  UrlFetchApp.fetch(botUrl + "/sendMessage", {
-    method: "post",
-    contentType: "application/json",
-    payload: JSON.stringify(payload)
-  });
+  try {
+    UrlFetchApp.fetch(botUrl + "/sendMessage", {
+      method: "post",
+      contentType: "application/json",
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+  } catch (e) {}
 }
 
-function sendCategoryView(botUrl, chatId, messageId, categoryId) {
-  const text = "🛍️ **AI TOOLS & DIGITAL SERVICES STORE** 🔥\n\nសូមជ្រើសរើសកម្មវិធី/សេវាកម្មខាងក្រោម ដើម្បីទិញ៖";
+function sendCategoryView(botUrl, chatId, messageId) {
+  const text = "🛍️ <b>AI TOOLS &amp; DIGITAL SERVICES STORE</b> 🔥\n\nសូមជ្រើសរើសកម្មវិធី/សេវាកម្មខាងក្រោម ដើម្បីទិញ៖";
   const inline_keyboard = [];
   PRODUCTS.forEach(function(p) {
     const priceFormatted = "$" + p.price.toFixed(2);
@@ -484,6 +516,7 @@ function sendProductDetail(botUrl, chatId, messageId, productId) {
 
   try {
     CacheService.getScriptCache().put("last_prod_" + chatId, productId, 21600);
+    PropertiesService.getScriptProperties().setProperty("last_prod_" + chatId, productId);
   } catch (e) {}
 
   const imageUrl = GITHUB_RAW_BASE + "/" + p.image;
@@ -492,18 +525,18 @@ function sendProductDetail(botUrl, chatId, messageId, productId) {
 
   let promotionsText = "";
   if (p.promotions && p.promotions.length > 0) {
-    promotionsText = "\n🎁 **Promotions:**\n" + p.promotions.map(function(promo) { return "- " + promo; }).join("\n") + "\n";
+    promotionsText = "\n🎁 <b>Promotions:</b>\n" + p.promotions.map(function(promo) { return "- " + escapeHtml(promo); }).join("\n") + "\n";
   }
 
-  const caption = "1️⃣ **" + p.title + "**\n" +
-                  "💵 **Price:** `$" + p.price.toFixed(2) + "`\n" +
-                  "➕ **Stock:** " + stockCount + " accounts\n" +
-                  "📊 **Sold:** " + soldCount + " accounts\n\n" +
-                  "❞ **Description:**\n" + p.description + "\n❞\n" +
+  const caption = "1️⃣ <b>" + escapeHtml(p.title) + "</b>\n" +
+                  "💵 <b>Price:</b> <code>$" + p.price.toFixed(2) + "</code>\n" +
+                  "➕ <b>Stock:</b> " + stockCount + " accounts\n" +
+                  "📊 <b>Sold:</b> " + soldCount + " accounts\n\n" +
+                  "❞ <b>Description:</b>\n" + escapeHtml(p.description) + "\n❞\n" +
                   promotionsText + "\n" +
-                  "🔴 **សញ្ញាបញ្ជាក់របៀបទិញ (How to Buy):**\n" +
-                  "👉 **សូមវាយបញ្ជូន \"លេខចំនួន\" អាខោនដែលបងចង់ទិញ ចូលក្នុង Chat នេះ** (ឧទាហរណ៍៖ វាយលេខ `1` ឬ `2` ឬ `5` រួចចុច Send)\n\n" +
-                  "✏️ **Enter quantity to buy (1-" + stockCount + "):**";
+                  "🔴 <b>សញ្ញាបញ្ជាក់របៀបទិញ (How to Buy):</b>\n" +
+                  "👉 <b>សូមវាយបញ្ជូន \"លេខចំនួន\" អាខោនដែលបងចង់ទិញ ចូលក្នុង Chat នេះ</b> (ឧទាហរណ៍៖ វាយលេខ <code>1</code> ឬ <code>2</code> ឬ <code>5</code> រួចចុច Send)\n\n" +
+                  "✏️ <b>Enter quantity to buy (1-" + stockCount + "):</b>";
 
   const inline_keyboard = [
     [
@@ -523,15 +556,16 @@ function sendCheckoutOptions(botUrl, chatId, messageId, productId, qty) {
   const totalPrice = (unitPrice * quantity).toFixed(2);
   const billNo = Math.floor(100000 + Math.random() * 900000);
 
-  const text = "Choose payment method:\nTotal: $" + totalPrice + "\n\n🛒 Product: **" + p.title + "**\n🔢 Quantity: **" + quantity + "** (តម្លៃក្នុងមួយអាខោន: $" + unitPrice.toFixed(2) + ")";
+  const text = "🛒 <b>វិក្កយបត្របញ្ជាទិញ / ORDER SUMMARY</b>\n\n" +
+               "• <b>ផលិតផល៖</b> " + escapeHtml(p.title) + "\n" +
+               "• <b>ចំនួនទិញ៖</b> " + quantity + " អាខោន (តម្លៃរាយ: $" + unitPrice.toFixed(2) + ")\n" +
+               "• <b>តម្លៃសរុប៖</b> <b>$" + totalPrice + " USD</b>\n\n" +
+               "👇 <b>សូមជ្រើសរើសវិធីសាស្ត្រទូទាត់ប្រាក់ (Select Payment Method)៖</b>";
 
   const inline_keyboard = [
-    [{ text: "💰 Pay with Wallet", callback_data: "pay_wallet_" + p.id + "_" + quantity + "_" + billNo }],
-    [{ text: "Pay with Binance", callback_data: "pay_binance_" + p.id + "_" + quantity + "_" + billNo }],
-    [{ text: "⚪ Pay with USDT (BEP20)", callback_data: "pay_usdtbep_" + p.id + "_" + quantity + "_" + billNo }],
-    [{ text: "⚪ Pay with USDT (TRC20)", callback_data: "pay_usdttrc_" + p.id + "_" + quantity + "_" + billNo }],
     [{ text: "🏦 ABA Bank (KHQR)", callback_data: "pay_aba_" + p.id + "_" + quantity + "_" + billNo }],
-    [{ text: "🔙 ត្រឡប់ក្រោយ", callback_data: "prod_" + p.id }]
+    [{ text: "🟡 Binance", callback_data: "pay_binance_" + p.id + "_" + quantity + "_" + billNo }],
+    [{ text: "🔙 ត្រឡប់ក្រោយ (Back)", callback_data: "prod_" + p.id }]
   ];
 
   sendFastMessage(botUrl, chatId, messageId, text, { inline_keyboard: inline_keyboard }, null);
@@ -554,30 +588,21 @@ function sendPaymentDetails(botUrl, chatId, messageId, productId, qty, billNo, m
 
   if (method === "aba") {
     qrUrl = GITHUB_RAW_BASE + "/assets/images/user_aba_khqr.jpg";
-    caption = "🏦 **ABA Bank Payment (KHQR)**\n\n" +
-              "• ឈ្មោះគណនី៖ **CHES SOY**\n" +
-              "• លេខគណនី ABA៖ `081 887 350` (ចុចដើម្បីចម្លង)\n" +
-              "• ចំនួនទឹកប្រាក់សរុប៖ **$" + totalPrice + " USD**\n" +
-              "• លេខវិក្កយបត្រ៖ **#" + billNo + "**\n" +
-              "• ផលិតផល៖ **" + p.title + "** (ចំនួន: " + quantity + ")\n\n" +
-              "⚠️ **សូមស្កែនរូបភាព ABA KHQR កូដខាងលើ ឬផ្ទេរប្រាក់ រួចផ្ញើរូបភាពបង្កាន់ដៃបង់ប្រាក់ (Receipt Screenshot) មកកាន់ Chat នេះបាទ។**";
-  } else if (method === "binance" || method === "usdtbep" || method === "usdttrc") {
-    qrUrl = GITHUB_RAW_BASE + "/assets/images/binance_qr.png";
-    const networkInfo = method === "usdtbep" ? "BEP20" : (method === "usdttrc" ? "TRC20" : "Binance Pay / USDT");
-    caption = "Binance ID (tap to copy): `294507047`\n" +
-              "Amount to transfer: $" + totalPrice + "\n" +
-              "Network: **" + networkInfo + "**\n" +
-              "Bill ID: **#" + billNo + "**\n" +
-              "Product: **" + p.title + "** (" + quantity + "x)\n\n" +
-              "Please send the order ID or off-chain transaction reference (or screenshot photo) after payment for verification.";
+    caption = "🏦 <b>ABA Bank Payment (KHQR)</b>\n\n" +
+              "• ឈ្មោះគណនី៖ <b>CHES SOY</b>\n" +
+              "• លេខគណនី ABA៖ <code>081 887 350</code> (ចុចដើម្បីចម្លង)\n" +
+              "• ចំនួនទឹកប្រាក់សរុប៖ <b>$" + totalPrice + " USD</b>\n" +
+              "• លេខវិក្កយបត្រ៖ <b>#" + billNo + "</b>\n" +
+              "• ផលិតផល៖ <b>" + escapeHtml(p.title) + "</b> (ចំនួន: " + quantity + ")\n\n" +
+              "⚠️ <b>សូមស្កែនរូបភាព ABA KHQR កូដខាងលើ ឬផ្ទេរប្រាក់ រួចផ្ញើរូបភាពបង្កាន់ដៃបង់ប្រាក់ (Receipt Screenshot) មកកាន់ Chat នេះបាទ។</b>";
   } else {
     qrUrl = GITHUB_RAW_BASE + "/assets/images/binance_qr.png";
-    caption = "💰 **Pay with Wallet / Admin Transfer**\n\n" +
-              "• Binance ID / Wallet: `294507047`\n" +
-              "• Amount to transfer: **$" + totalPrice + " USD**\n" +
-              "• Bill ID: **#" + billNo + "**\n" +
-              "• Product: **" + p.title + "** (" + quantity + "x)\n\n" +
-              "Please send the receipt screenshot or transaction reference after payment for verification.";
+    caption = "🟡 <b>Binance Payment</b>\n\n" +
+              "• Binance ID (ចុចដើម្បីចម្លង)៖ <code>294507047</code>\n" +
+              "• ចំនួនទឹកប្រាក់ត្រូវផ្ទេរ៖ <b>$" + totalPrice + " USD</b>\n" +
+              "• លេខវិក្កយបត្រ៖ <b>#" + billNo + "</b>\n" +
+              "• ផលិតផល៖ <b>" + escapeHtml(p.title) + "</b> (ចំនួន: " + quantity + ")\n\n" +
+              "⚠️ <b>សូមផ្ទេរប្រាក់តាម Binance ID ខាងលើ រួចផ្ញើរូបភាពបង្កាន់ដៃបង់ប្រាក់ (Screenshot) ឬ TxID មកកាន់ Chat នេះដើម្បីផ្ទៀងផ្ទាត់បាទ។</b>";
   }
 
   sendFastMessage(botUrl, chatId, messageId, caption, { inline_keyboard: inline_keyboard }, qrUrl);
